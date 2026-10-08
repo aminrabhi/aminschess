@@ -14,7 +14,7 @@ body{margin:0;font-family:'Nunito','Trebuchet MS',system-ui,sans-serif;color:var
 .app{display:grid;grid-template-columns:1fr 370px;min-height:100vh}
 .stage{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:16px}
 .logo{position:absolute;left:20px;top:14px;font-weight:900;font-size:28px;color:var(--main)}
-.scene{perspective:1100px;width:100%;height:calc(var(--s)*9.6);display:flex;align-items:center;justify-content:center}
+.scene{perspective:1100px;width:100%;height:calc(var(--s)*9.6);display:flex;align-items:center;justify-content:center;cursor:grab;touch-action:none;user-select:none}
 .board{--rz:-20;position:relative;width:calc(var(--s)*8);height:calc(var(--s)*8);transform-style:preserve-3d}
 .grid{position:absolute;inset:0;display:grid;grid-template-columns:repeat(8,1fr);grid-template-rows:repeat(8,1fr);transform-style:preserve-3d;border:3px solid var(--base)}
 .sq{position:relative;transform-style:preserve-3d;cursor:pointer}
@@ -114,7 +114,7 @@ function make(st,m){
   if(q===63)c=c.replace('K','');if(q===56)c=c.replace('Q','');if(q===7)c=c.replace('k','');if(q===0)c=c.replace('q','')}
  return{b,t:w?'b':'w',c,ep:m.dbl?(m.f+m.to)/2:-1}}
 function inCheck(st){const w=st.t==='w';return att(st.b,st.b.indexOf(w?'K':'k'),!w)}
-function legal(st){const w=st.t==='w',k=w?'K':'k';return pseudo(st).filter(m=>{const n=make(st,m);return!att(n.b,n.b.indexOf(k),w)})}
+function legal(st){const w=st.t==='w',k=w?'K':'k';return pseudo(st).filter(m=>{const n=make(st,m);return!att(n.b,n.b.indexOf(k),!w)})}
 
 /* ---------- bot brain ---------- */
 function ev(b){let s=0;for(let i=0;i<64;i++){const p=b[i];if(!p)continue;const w=isW(p),k=p.toLowerCase(),r=i>>3,f=i&7;
@@ -177,8 +177,26 @@ const shadow=document.createElement('div');shadow.className='shadow';shadow.styl
 for(let i=1;i<=12;i++){const l=document.createElement('div');l.className='layer';l.style.transform='translateZ(-'+i+'px)';l.style.filter='brightness('+(1-i*.012)+')';board.appendChild(l)}
 const grid=document.createElement('div');grid.className='grid';board.appendChild(grid);
 const sqs=[];for(let i=0;i<64;i++){const d=document.createElement('div');d.onclick=()=>click(i);grid.appendChild(d);sqs.push(d)}
-let st,sel,tg,last,legalNow,chk,busy,gid=0,lastCard,rz=-20;
-function view(){board.style.setProperty('--rz',rz);board.style.transform=`rotateX(52deg) rotateZ(${rz}deg)`}
+let st,sel,tg,last,legalNow,chk,busy,gid=0,lastCard,rz=-20,rx=52;
+
+/* mouse: tilt with movement, drag to spin */
+let mx=0,my=0,tx=0,ty=0,down=null,dragged=false;
+addEventListener('pointermove',e=>{
+ tx=e.clientX/innerWidth-.5;ty=e.clientY/innerHeight-.5;
+ if(down){
+  if(Math.abs(e.clientX-down.x)+Math.abs(e.clientY-down.y)>6)dragged=true;
+  if(dragged){rz+=(e.clientX-down.lx)*.4;rx=Math.max(20,Math.min(80,rx-(e.clientY-down.ly)*.3))}
+  down.lx=e.clientX;down.ly=e.clientY}});
+addEventListener('pointerdown',e=>{if(e.target.closest('button,select,.side'))return;
+ down={x:e.clientX,y:e.clientY,lx:e.clientX,ly:e.clientY};dragged=false});
+addEventListener('pointerup',()=>{down=null;setTimeout(()=>{dragged=false},60)});
+function frame(){
+ mx+=(tx-mx)*.06;my+=(ty-my)*.06;
+ const a=rz+mx*26,b=rx-my*10;
+ board.style.setProperty('--rz',a);
+ board.style.transform=`rotateX(${b}deg) rotateZ(${a}deg)`;
+ requestAnimationFrame(frame)}
+
 function render(){
  for(let i=0;i<64;i++){const s=sqs[i],p=st.b[i];
   s.className='sq '+(((i>>3)+(i&7))%2?'d':'l')+(sel===i?' sel':'')+(last.includes(i)?' last':'')+(tg.has(i)?' hint'+(p?' cap':''):'')+(chk===i?' chk':'');
@@ -195,7 +213,7 @@ function refresh(){
  render()}
 function botMove(){
  const l=+lvl.value,s=scoreMoves(st,l).sort((a,b)=>b.s-a.s),pool=s.filter(x=>x.s>=s[0].s-(l===1?80:l===2?15:5)),m=pool[Math.random()*pool.length|0].m;
- const bef=st;st=make(st,m);last=[m.f,m.to];refresh();
+ st=make(st,m);last=[m.f,m.to];refresh();
  if(lastCard){const d=document.createElement('div');d.className='bot';d.textContent=`Bot replied: ${nm(m.p)} ${sqn(m.f)} → ${sqn(m.to)}${m.cap?' (captured your '+nm(m.cap)+')':''}`;lastCard.appendChild(d)}}
 function play(m){
  busy=true;const g=gid,bef=st;st=make(st,m);last=[m.f,m.to];sel=null;tg=new Set();refresh();
@@ -203,19 +221,19 @@ function play(m){
   if(!legalNow.length){busy=false;return}
   setTimeout(()=>{if(g!==gid)return;botMove();busy=false},60)},40)}
 function click(i){
- if(busy||st.t!=='w'||!legalNow.length)return;
+ if(dragged||busy||st.t!=='w'||!legalNow.length)return;
  const mv=sel!==null&&legalNow.find(m=>m.f===sel&&m.to===i);if(mv)return play(mv);
  const p=st.b[i];
  if(p&&isW(p)){sel=i;tg=new Set(legalNow.filter(m=>m.f===i).map(m=>m.to))}else{sel=null;tg=new Set()}
  render()}
 function newGame(){gid++;st=init();sel=null;tg=new Set();last=[];busy=false;moveNo=0;lastCard=null;feed.innerHTML='';
  const el=document.createElement('div');el.className='card info';
- el.innerHTML='<b>Welcome! 👋</b><p>You are white — tap a piece, then tap where to move it. After every move I\'ll grade it and tell you how you could have done better.</p>';
+ el.innerHTML='<b>Welcome! 👋</b><p>You are white — tap a piece, then tap where to move it. After every move I\'ll grade it and tell you how you could have done better.</p><p>Move your mouse to tilt the board, or click and drag to spin it.</p>';
  feed.appendChild(el);refresh()}
 document.getElementById('new').onclick=newGame;
-document.getElementById('rl').onclick=()=>{rz-=15;view()};
-document.getElementById('rr').onclick=()=>{rz+=15;view()};
-view();newGame();
+document.getElementById('rl').onclick=()=>{rz-=15};
+document.getElementById('rr').onclick=()=>{rz+=15};
+newGame();requestAnimationFrame(frame);
 </script>
 </body>
 </html>
