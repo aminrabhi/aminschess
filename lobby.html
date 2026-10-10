@@ -50,7 +50,7 @@ input{font:900 28px 'Nunito',sans-serif;text-align:center;letter-spacing:6px;tex
 .app.flat{--s:clamp(30px,min(10.5vw,8.2vh),82px)}
 .app.flat .scene{height:calc(var(--s)*8.5);cursor:default}
 .flat .layer,.flat .shadow{display:none}
-.flat .pc{left:0;top:0;width:100%;height:100%;align-items:center;font-size:calc(var(--s)*.86);transform-origin:50% 50%;transform:rotate(calc(var(--rz)*-1deg))}
+.flat .pc{left:0;top:0;width:100%;height:100%;align-items:center;font-size:calc(var(--s)*.86);transform:none}
 .app.flat #rl,.app.flat #rr{display:none}
 .btn{font:800 14px/1 'Nunito',sans-serif;letter-spacing:.8px;text-transform:uppercase;border-radius:14px;padding:12px 18px;cursor:pointer;
  border:2px solid var(--line);border-bottom-width:4px;background:#fff;color:var(--main-d)}
@@ -274,7 +274,7 @@ addEventListener('pointerup',()=>{down=null;setTimeout(()=>{dragged=false},60)})
 function frame(){
  mx+=(tx-mx)*.06;my+=(ty-my)*.06;
  const fl=myC==='b'?180:0;
- if(flat){board.style.transform=fl?'rotate(180deg)':'none';board.style.setProperty('--rz',fl)}
+if(flat){board.style.transform='none';board.style.setProperty('--rz',0)}
  else{const a=rz+fl+mx*26,b=rx-my*10;
   board.style.setProperty('--rz',a);
   board.style.transform=`rotateX(${b}deg) rotateZ(${a}deg)`}
@@ -283,7 +283,7 @@ function frame(){
 /* piece slide animation */
 function slide(f,to,k){
  const s=sqs[0].offsetWidth,pw=sqs[to].firstChild;if(!pw||!pw.animate)return;
- const dx=((f&7)-(to&7))*s,dy=((f>>3)-(to>>3))*s,lift=flat?24:s*(k==='n'?1.6:.8);
+ const sg=(flat&&myC==='b')?-1:1,dx=((f&7)-(to&7))*s*sg,dy=((f>>3)-(to>>3))*s*sg,lift=flat?24:s*(k==='n'?1.6:.8);
  pw.animate([{transform:`translate3d(${dx}px,${dy}px,0)`},
   {transform:`translate3d(${dx/2}px,${dy/2}px,${lift}px)`,offset:.5},
   {transform:'translate3d(0,0,0)'}],{duration:360,easing:'ease-in-out'})}
@@ -292,7 +292,7 @@ function animateMove(m){
  if(m.ca)slide(m.ca>0?m.f+3:m.f-4,m.ca>0?m.f+1:m.f-1,'r')}
 
 function render(){
- for(let i=0;i<64;i++){const s=sqs[i],p=st.b[i];
+ for(let i=0;i<64;i++){const s=sqs[i],p=st.b[i];s.style.order=(flat&&myC==='b')?63-i:'';
   s.className='sq '+(((i>>3)+(i&7))%2?'d':'l')+(sel===i?' sel':'')+(last.includes(i)?' last':'')+(tg.has(i)?' hint'+(p?' cap':''):'')+(chk===i?' chk':'');
   let pw=s.firstChild;
   if(p){if(!pw){pw=document.createElement('div');pw.className='pw';pw.innerHTML='<div class="pc"></div>';s.appendChild(pw)}
@@ -390,7 +390,8 @@ $('new').onclick=()=>{if(mode==='net'){if(gone)return;conn&&conn.send({t:'new'})
 $('leave').onclick=()=>{cleanup();mode=null;gone=false;hostReset();say('');show('lobby')};
 $('rl').onclick=()=>{rz-=15};
 $('rr').onclick=()=>{rz+=15};
-$('flat').onclick=function(){flat=!flat;app.classList.toggle('flat',flat);this.textContent=flat?'3D board':'flat board'};
+$('flat').onclick=function(){flat=!flat;app.classList.toggle('flat',flat);this.textContent=flat?'3D board':'flat board';render()};
+
 
 /* ===== accounts (Supabase) ===== */
 const SUPABASE_URL='https://hoamwvhwnleznwohjslp.supabase.co/',SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvYW13dmh3bmxlem53b2hqc2xwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE2MzQzNTksImV4cCI6MjEwNzIxMDM1OX0.CprU4jwW0-emz4zXWAiI2ZAy1nXrTrtm5NCSSeJX-A4';
