@@ -41,7 +41,7 @@ body{margin:0;min-height:100vh;font-family:'Nunito','Trebuchet MS',system-ui,san
 
 /* ===== the book ===== */
 .book{position:relative;width:min(92vw,500px);height:min(70vh,660px);perspective:2400px;touch-action:pan-y}
-.book.in{animation:bookin .5s}
+.book.fresh{animation:bookin .5s}
 @keyframes bookin{from{opacity:0;transform:translateY(14px)}}
 .rings{position:absolute;left:-13px;top:18px;bottom:18px;width:26px;z-index:1000;pointer-events:none;
  background:radial-gradient(ellipse 12px 6px at 50% 50%,#1d96d4 0 98%,transparent 100%) 0 0/26px 40px repeat-y}
@@ -279,7 +279,7 @@ function openChapter(chapter,btn){
  N=leaves.length;cur=0;busy=false;
  leaves.forEach((l,i)=>l.style.zIndex=N-i);
  drawBoards(book);ui();
- book.classList.remove('in');void book.offsetWidth;book.classList.add('in')}
+ book.classList.remove('fresh');void book.offsetWidth;book.classList.add('fresh')}
 
 function go(d){
  const n=cur+d;if(busy||n<0||n>=N)return;
