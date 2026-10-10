@@ -10,18 +10,39 @@
 *{box-sizing:border-box}
 body{margin:0;min-height:100vh;font-family:'Nunito','Trebuchet MS',system-ui,sans-serif;color:var(--ink);overflow-x:hidden;
  background:conic-gradient(#d9effc 25%,#f0f9ff 0 50%,#d9effc 0 75%,#f0f9ff 0) 0 0/90px 90px;animation:mv 14s linear infinite;
- display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:76px 16px 24px}
+ display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:76px 16px 24px 294px}
 @keyframes mv{to{background-position:180px 90px}}
-.top{position:fixed;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:14px 20px;z-index:1100}
+.top{position:fixed;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:12px 20px;z-index:1100}
+.tl{display:flex;align-items:center;gap:12px}
 .logo{font-weight:900;font-size:28px;color:var(--main);text-decoration:none}
 .btn{font:800 14px/1 'Nunito',sans-serif;letter-spacing:.8px;text-transform:uppercase;border-radius:14px;padding:13px 20px;cursor:pointer;
  border:2px solid var(--line);border-bottom-width:4px;background:#fff;color:var(--main-d);text-decoration:none;display:inline-block}
 .btn:active{transform:translateY(2px);border-bottom-width:2px}
 .btn.go{background:var(--main);color:#fff;border:0;border-bottom:4px solid var(--main-d)}
 .btn:disabled{opacity:.4;cursor:default;transform:none}
+.menu{display:none}
+
+/* ===== left menu ===== */
+.side{position:fixed;top:64px;left:16px;bottom:16px;width:262px;background:#fff;border:2px solid var(--line);border-bottom-width:6px;border-radius:22px;padding:14px;overflow:auto;z-index:900}
+.unit{margin-bottom:12px}
+.unit-b{width:100%;display:flex;justify-content:space-between;align-items:center;text-align:left;background:var(--main);color:#fff;border:0;border-bottom:4px solid var(--main-d);border-radius:16px;padding:14px 16px;font:900 15px 'Nunito',sans-serif;cursor:pointer}
+.unit-b .ar{transition:transform .25s}.unit.open .ar{transform:rotate(90deg)}
+.chs{display:none;flex-direction:column;gap:6px;padding:8px 0 4px 6px}
+.unit.open .chs{display:flex}
+.ch{display:flex;align-items:center;gap:10px;width:100%;background:#fff;border:2px solid var(--line);border-bottom-width:4px;border-radius:14px;padding:10px 12px;font:800 14.5px 'Nunito',sans-serif;color:var(--ink);cursor:pointer;text-align:left}
+.ch .ic{font-size:22px;width:28px;text-align:center;color:var(--dark)}
+.ch.on{background:#e8f6fe;border-color:var(--main);color:var(--main-d)}
+@media(max-width:860px){
+ body{padding-left:16px}
+ .menu{display:inline-block;padding:11px 14px}
+ .side{transform:translateX(-115%);transition:transform .3s}
+ .side.open{transform:none}
+}
 
 /* ===== the book ===== */
 .book{position:relative;width:min(92vw,500px);height:min(70vh,660px);perspective:2400px;touch-action:pan-y}
+.book.in{animation:bookin .5s}
+@keyframes bookin{from{opacity:0;transform:translateY(14px)}}
 .rings{position:absolute;left:-13px;top:18px;bottom:18px;width:26px;z-index:1000;pointer-events:none;
  background:radial-gradient(ellipse 12px 6px at 50% 50%,#1d96d4 0 98%,transparent 100%) 0 0/26px 40px repeat-y}
 .leaf{position:absolute;inset:0;transform-origin:left center;transform-style:preserve-3d;transition:transform .95s cubic-bezier(.55,.05,.25,1)}
@@ -72,9 +93,10 @@ figcaption{font-size:13px;font-weight:800;color:#7a8b97;text-align:center;margin
 <body>
 
 <div class="top">
- <a class="logo" href="index.html">amin's chess</a>
+ <div class="tl"><button class="btn menu" id="menuBtn">☰ menu</button><a class="logo" href="index.html">amin's chess</a></div>
  <a class="btn go" href="lobby.html">play</a>
 </div>
+<aside class="side" id="side"><div id="menu"></div></aside>
 
 <div class="book" id="book"></div>
 
@@ -85,10 +107,18 @@ figcaption{font-size:13px;font-weight:800;color:#7a8b97;text-align:center;margin
 </div>
 
 <!-- ==================================================================
- HOW TO ADD A NEW PAGE
- 1. Copy any section block below (from the opening section tag to the closing one).
- 2. Paste it where you want the page. Pages appear in the order they are written.
- 3. Edit the text. Page numbers, flipping and the progress bar update by themselves.
+ HOW THE GUIDEBOOK IS ORGANIZED
+   unit    = a group in the left menu (Unit 1: The pieces)
+   chapter = one book inside a unit (Chapter 1: The pawn)
+   section = one page inside a chapter. The first one is the cover.
+
+ ADD A NEW PAGE
+   Copy any section block and paste it inside a chapter. Pages go in the order they are written.
+ ADD A NEW CHAPTER
+   Copy a whole chapter block (div class="chapter"), paste it inside a unit, change data-title and data-icon.
+ ADD A NEW UNIT
+   Copy a whole unit block (div class="unit"), paste it below the others, change data-title.
+ Page numbers, flipping, the menu and the progress bar all update by themselves.
 
  THINGS YOU CAN PUT IN A PAGE
    <div class="kick">small label</div>    <h2>title</h2>    <p>text</p>
@@ -102,20 +132,22 @@ figcaption{font-size:13px;font-weight:800;color:#7a8b97;text-align:center;margin
      data-go    squares that get a move dot
      data-hit   squares that get a red capture ring
      data-anim  optional: the piece on the first square slides to the second
-   To add captions and put diagrams side by side, wrap them like this:
+   Captions and side-by-side diagrams:
      <div class="figs"><figure><div class="bd" ...></div><figcaption>caption</figcaption></figure></div>
 =================================================================== -->
-<div id="pages" hidden>
+<div id="library" hidden>
+<div class="unit" data-title="Unit 1: The pieces">
 
-<!-- COVER -->
+<!-- ============ CHAPTER 1: PAWN ============ -->
+<div class="chapter" data-title="Chapter 1: The pawn" data-icon="♟&#xFE0E;">
+
 <section class="cover">
  <div class="big">♟&#xFE0E;</div>
- <h2>the chess guidebook</h2>
- <p>chapter 1: the pawn</p>
+ <h2>the pawn</h2>
+ <p>chapter 1</p>
  <p style="margin-top:22px">tap <b>next</b> to start →</p>
 </section>
 
-<!-- PAGE: meet the pawn -->
 <section>
  <div class="kick">chapter 1 · the pawn</div>
  <h2>meet the pawn</h2>
@@ -128,44 +160,29 @@ figcaption{font-size:13px;font-weight:800;color:#7a8b97;text-align:center;margin
  <div class="tip">💡 Pawns only ever move forward, never backwards!</div>
 </section>
 
-<!-- PAGE: moving forward -->
 <section>
  <div class="kick">chapter 1 · the pawn</div>
  <h2>moving forward</h2>
  <p>A pawn walks <b>straight forward, one square</b> at a time.</p>
  <p>On its <b>very first move</b>, a pawn may jump <b>two squares</b> instead if it wants to.</p>
  <div class="figs">
-  <figure>
-   <div class="bd" data-p="wP e2" data-go="e3 e4" data-anim="e2 e4"></div>
-   <figcaption>First move: one or two squares</figcaption>
-  </figure>
-  <figure>
-   <div class="bd" data-p="wP e4" data-go="e5" data-anim="e4 e5"></div>
-   <figcaption>After that: just one square</figcaption>
-  </figure>
+  <figure><div class="bd" data-p="wP e2" data-go="e3 e4" data-anim="e2 e4"></div><figcaption>First move: one or two squares</figcaption></figure>
+  <figure><div class="bd" data-p="wP e4" data-go="e5" data-anim="e4 e5"></div><figcaption>After that: just one square</figcaption></figure>
  </div>
  <div class="tip">💡 A pawn can't move backwards or sideways.</div>
 </section>
 
-<!-- PAGE: capturing -->
 <section>
  <div class="kick">chapter 1 · the pawn</div>
  <h2>capturing is different!</h2>
  <p>Pawns move straight, but they <b>capture diagonally</b>: one square forward and to the left or right.</p>
  <p>A pawn <b>cannot</b> capture a piece directly in front of it. If something blocks the way, the pawn is stuck.</p>
  <div class="figs">
-  <figure>
-   <div class="bd" data-p="wP e4, bP d5, bP f5" data-go="e5" data-hit="d5 f5"></div>
-   <figcaption>Red rings: the pawn can capture these</figcaption>
-  </figure>
-  <figure>
-   <div class="bd" data-p="wP e4, bP e5"></div>
-   <figcaption>Blocked! This pawn can't move at all</figcaption>
-  </figure>
+  <figure><div class="bd" data-p="wP e4, bP d5, bP f5" data-go="e5" data-hit="d5 f5"></div><figcaption>Red rings: the pawn can capture these</figcaption></figure>
+  <figure><div class="bd" data-p="wP e4, bP e5"></div><figcaption>Blocked! This pawn can't move at all</figcaption></figure>
  </div>
 </section>
 
-<!-- PAGE: promotion -->
 <section>
  <div class="kick">chapter 1 · the pawn</div>
  <h2>promotion ⭐</h2>
@@ -175,10 +192,9 @@ figcaption{font-size:13px;font-weight:800;color:#7a8b97;text-align:center;margin
   <div class="bd" data-p="wP e7" data-go="e8" data-anim="e7 e8"></div>
   <figcaption>One more step and this pawn becomes a queen</figcaption>
  </figure></div>
- <div class="tip">💡 This is why even a little pawn can be powerful. Protect your pawns that are close to the end!</div>
+ <div class="tip">💡 Even a little pawn can be powerful. Protect your pawns that are close to the end!</div>
 </section>
 
-<!-- PAGE: en passant -->
 <section>
  <div class="kick">chapter 1 · the pawn</div>
  <h2>en passant</h2>
@@ -191,7 +207,6 @@ figcaption{font-size:13px;font-weight:800;color:#7a8b97;text-align:center;margin
  </figure></div>
 </section>
 
-<!-- PAGE: recap -->
 <section>
  <div class="kick">chapter 1 · the pawn</div>
  <h2>quick recap</h2>
@@ -208,6 +223,11 @@ figcaption{font-size:13px;font-weight:800;color:#7a8b97;text-align:center;margin
 </section>
 
 </div>
+
+<!-- ############ PASTE NEW CHAPTERS HERE ############ -->
+
+</div><!-- end unit 1 -->
+</div><!-- end library -->
 
 <script>
 const $=id=>document.getElementById(id);
@@ -238,23 +258,29 @@ function drawBoards(root){
  });
 }
 
-/* ---- build the book from the page blocks ---- */
-const book=$('book'),src=[...document.querySelectorAll('#pages > section')];
+/* ---- the book ---- */
+const book=$('book');
 book.insertAdjacentHTML('beforeend','<div class="rings"></div>');
-const leaves=src.map((s,i)=>{
- const l=document.createElement('div');l.className='leaf';
- const cover=s.classList.contains('cover');
- l.innerHTML=`<div class="face front ${s.className}"><div class="in">${s.innerHTML}</div>${cover?'':`<div class="pn">${i}</div>`}</div><div class="face back"></div>`;
- book.appendChild(l);return l});
-drawBoards(book);
+let leaves=[],N=0,cur=0,busy=false;
 
-/* ---- flipping ---- */
-const N=leaves.length;let cur=0,busy=false;
-leaves.forEach((l,i)=>l.style.zIndex=N-i);
 function ui(){
  $('prev').disabled=cur===0;$('next').disabled=cur===N-1;
  $('fill').style.width=(N>1?cur/(N-1)*100:100)+'%';
  $('lbl').textContent=cur===0?'cover':`page ${cur} of ${N-1}`}
+
+function openChapter(chapter,btn){
+ document.querySelectorAll('.ch.on').forEach(x=>x.classList.remove('on'));btn.classList.add('on');
+ book.querySelectorAll('.leaf').forEach(l=>l.remove());
+ leaves=[...chapter.querySelectorAll(':scope > section')].map((s,i)=>{
+  const l=document.createElement('div');l.className='leaf';
+  const cover=s.classList.contains('cover');
+  l.innerHTML=`<div class="face front ${s.className}"><div class="in">${s.innerHTML}</div>${cover?'':`<div class="pn">${i}</div>`}</div><div class="face back"></div>`;
+  book.appendChild(l);return l});
+ N=leaves.length;cur=0;busy=false;
+ leaves.forEach((l,i)=>l.style.zIndex=N-i);
+ drawBoards(book);ui();
+ book.classList.remove('in');void book.offsetWidth;book.classList.add('in')}
+
 function go(d){
  const n=cur+d;if(busy||n<0||n>=N)return;
  busy=true;
@@ -262,14 +288,35 @@ function go(d){
  leaf.style.zIndex=999;leaf.classList.toggle('flipped',d>0);
  setTimeout(()=>{leaf.style.zIndex=d>0?i+1:N-i;busy=false},960);
  cur=n;ui()}
+
 $('next').onclick=()=>go(1);
 $('prev').onclick=()=>go(-1);
 addEventListener('keydown',e=>{if(e.key==='ArrowRight')go(1);if(e.key==='ArrowLeft')go(-1)});
 let sx=null;
 book.addEventListener('pointerdown',e=>{sx=e.clientX});
 book.addEventListener('pointerup',e=>{if(sx===null)return;const dx=e.clientX-sx;sx=null;if(dx<-60)go(1);else if(dx>60)go(-1)});
-ui();
+
+/* ---- build the left menu from the library ---- */
+let firstBtn=null,firstChapter=null;
+document.querySelectorAll('#library > .unit').forEach((u,n)=>{
+ const d=document.createElement('div');d.className='unit'+(n===0?' open':'');
+ d.innerHTML='<button class="unit-b"><span></span><span class="ar">▸</span></button><div class="chs"></div>';
+ d.querySelector('span').textContent=u.dataset.title;
+ d.querySelector('.unit-b').onclick=()=>d.classList.toggle('open');
+ const box=d.querySelector('.chs');
+ u.querySelectorAll(':scope > .chapter').forEach(c=>{
+  const b=document.createElement('button');b.className='ch';
+  b.innerHTML='<span class="ic"></span><span class="tt"></span>';
+  b.querySelector('.ic').textContent=c.dataset.icon||'📖';
+  b.querySelector('.tt').textContent=c.dataset.title;
+  b.onclick=()=>{openChapter(c,b);$('side').classList.remove('open')};
+  box.appendChild(b);
+  if(!firstBtn){firstBtn=b;firstChapter=c}
+ });
+ $('menu').appendChild(d);
+});
+$('menuBtn').onclick=()=>$('side').classList.toggle('open');
+if(firstChapter)openChapter(firstChapter,firstBtn);
 </script>
 </body>
 </html>
-
