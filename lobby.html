@@ -6,6 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <style>
 :root{--main:#3fb8f5;--main-d:#1d96d4;--ink:#3c3c3c;--line:#e5e5e5;--light:#f5faff;--dark:#5ec0f2;--base:#1f6fa3;--s:clamp(28px,min(5vw,8vh),54px)}
 *{box-sizing:border-box}
@@ -71,6 +72,20 @@ select{font:800 14px 'Nunito',sans-serif;padding:11px;border-radius:12px;border:
 .fix{background:#fff8e0;border-radius:10px;padding:6px 9px;margin-top:6px}
 @media(max-width:900px){.app{grid-template-columns:1fr}.side{height:auto;max-height:55vh;position:static}
  :root{--s:clamp(26px,9vw,52px)}.stage{padding-top:52px}}
+
+ .authbar{position:fixed;top:12px;right:14px;z-index:40;display:flex;gap:8px;align-items:center}
+.ab{font-weight:800;background:#fff;border:2px solid var(--line);border-radius:14px;padding:10px 14px}
+.pop{position:fixed;inset:0;z-index:60;background:rgba(20,40,60,.45);display:flex;align-items:center;justify-content:center;padding:20px}
+.popc{background:#fff;border:2px solid var(--line);border-bottom-width:6px;border-radius:26px;padding:26px 28px;width:min(92vw,400px);text-align:center;display:flex;flex-direction:column;gap:12px;animation:pip .4s cubic-bezier(.2,1.4,.4,1)}
+@keyframes pip{from{transform:scale(.6);opacity:0}}
+.popc h2{margin:0;font-size:34px;font-weight:900;color:var(--main-d)}.popc p{margin:0;font-weight:700;color:#777}
+.big{font-size:64px;line-height:1;animation:bob 1s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-8px) rotate(-6deg)}}
+.pst{font-size:13px;font-weight:800;color:var(--main-d)}
+input.tin{font:700 17px 'Nunito',sans-serif;letter-spacing:0;text-transform:none;text-align:left;width:100%;padding:12px 14px}
+.err{color:#e0453f;font-weight:800;font-size:14px;min-height:18px}
+.sw{background:none;border:0;color:var(--main-d);font:800 14px 'Nunito',sans-serif;cursor:pointer}
+
 </style>
 </head>
 <body>
@@ -115,6 +130,24 @@ select{font:800 14px 'Nunito',sans-serif;padding:11px;border-radius:12px;border:
   <div class="feed" id="feed"></div>
  </aside>
 </div>
+
+<canvas id="confetti" style="position:fixed;inset:0;pointer-events:none;z-index:70"></canvas>
+<div id="authbar" class="authbar"></div>
+
+<div id="pop" class="pop" hidden><div class="popc">
+ <div class="big" id="popE">🏆</div><h2 id="popT"></h2><p id="popP"></p><div class="pst" id="popS"></div>
+ <div class="row"><button class="btn go" id="popR">rematch</button><button class="btn" id="popC">view board</button><button class="btn" id="popL">lobby</button></div>
+</div></div>
+
+<div id="authm" class="pop" hidden><div class="popc">
+ <h2 id="amT">Log in</h2>
+ <input class="tin" id="amU" placeholder="username" maxlength="20" autocomplete="username" hidden>
+ <input class="tin" id="amE" type="email" placeholder="email" autocomplete="email">
+ <input class="tin" id="amP" type="password" placeholder="password" autocomplete="current-password">
+ <div id="amErr" class="err"></div>
+ <div class="row"><button class="btn go" id="amGo">log in</button><button class="btn" id="amX">cancel</button></div>
+ <button class="sw" id="amSw">no account? sign up</button>
+</div></div>
 
 <script>
 const G={p:'♟',n:'♞',b:'♝',r:'♜',q:'♛',k:'♚'},NM={p:'pawn',n:'knight',b:'bishop',r:'rook',q:'queen',k:'king'};
@@ -358,6 +391,81 @@ $('leave').onclick=()=>{cleanup();mode=null;gone=false;hostReset();say('');show(
 $('rl').onclick=()=>{rz-=15};
 $('rr').onclick=()=>{rz+=15};
 $('flat').onclick=function(){flat=!flat;app.classList.toggle('flat',flat);this.textContent=flat?'3D board':'flat board'};
+
+/* ===== accounts (Supabase) ===== */
+const SUPABASE_URL='https://hoamwvhwnleznwohjslp.supabase.co/',SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvYW13dmh3bmxlem53b2hqc2xwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE2MzQzNTksImV4cCI6MjEwNzIxMDM1OX0.CprU4jwW0-emz4zXWAiI2ZAy1nXrTrtm5NCSSeJX-A4';
+const sb=(typeof supabase!=='undefined'&&!SUPABASE_URL.includes('YOUR-'))?supabase.createClient(SUPABASE_URL,SUPABASE_KEY):null;
+let user=null,authMode='in';
+async function loadProfile(){
+ const bar=$('authbar');
+ if(!sb){bar.innerHTML='<span class="ab">accounts not set up yet</span>';return}
+ if(!user){
+  bar.innerHTML='<button class="btn" id="abIn">log in</button><button class="btn go" id="abUp">sign up</button>';
+  $('abIn').onclick=()=>openAuth('in');$('abUp').onclick=()=>openAuth('up');return}
+ const{data}=await sb.from('profiles').select('username,wins,losses,draws').eq('id',user.id).single();
+ const p=data||{username:'player',wins:0,losses:0,draws:0};
+ bar.innerHTML=`<span class="ab">👤 <b></b> · ${p.wins}W ${p.losses}L ${p.draws}D</span><button class="btn" id="abOut">log out</button>`;
+ bar.querySelector('b').textContent=p.username;
+ $('abOut').onclick=()=>sb.auth.signOut();
+}
+function openAuth(m){
+ authMode=m;$('amT').textContent=m==='in'?'Log in':'Create account';$('amU').hidden=m==='in';
+ $('amGo').textContent=m==='in'?'log in':'sign up';$('amSw').textContent=m==='in'?'no account? sign up':'have an account? log in';
+ $('amErr').textContent='';$('authm').hidden=false}
+$('amSw').onclick=()=>openAuth(authMode==='in'?'up':'in');
+$('amX').onclick=()=>{$('authm').hidden=true};
+$('amGo').onclick=async()=>{
+ const email=$('amE').value.trim(),password=$('amP').value,username=$('amU').value.trim(),err=$('amErr');
+ err.textContent='';
+ if(!email||!password){err.textContent='enter your email and password';return}
+ if(authMode==='up'){
+  if(username.length<3||username.length>20){err.textContent='username must be 3–20 characters';return}
+  const{data,error}=await sb.auth.signUp({email,password,options:{data:{username}}});
+  if(error){err.textContent=error.message;return}
+  if(!data.session){err.textContent='check your email to confirm your account, then log in ✉️';return}
+ }else{
+  const{error}=await sb.auth.signInWithPassword({email,password});
+  if(error){err.textContent=error.message;return}
+ }
+ $('authm').hidden=true};
+if(sb)sb.auth.onAuthStateChange((_e,s)=>{user=s?s.user:null;setTimeout(loadProfile,0)});else loadProfile();
+
+/* ===== win popup + confetti ===== */
+let ended=false;
+const _reset=reset;reset=function(c){ended=false;$('pop').hidden=true;_reset(c)};
+const _refresh=refresh;refresh=function(){_refresh();checkEnd()};
+const _show=show;show=function(v){_show(v);$('authbar').hidden=v!=='lobby';if(v!=='game')$('pop').hidden=true};
+function checkEnd(){
+ if(ended||gone||!st||legalNow.length||app.hidden)return;
+ ended=true;
+ const ck=inCheck(st),res=ck?(st.t!==myC?'win':'loss'):'draw';
+ setTimeout(()=>popup(res),800);
+ if(sb&&user&&(mode==='bot'||mode==='net'))sb.rpc('record_result',{r:res}).then(loadProfile);
+}
+function popup(res){
+ if(!ended||app.hidden)return;
+ const T={win:['🏆','You win!'],loss:['😵','You lost'],draw:['🤝','Draw']}[res];
+ $('popE').textContent=T[0];$('popT').textContent=T[1];
+ $('popP').textContent=res==='win'?'Nice game! Want to go again?':res==='loss'?(mode==='bot'?'The bot got you this time. Rematch?':'Good fight! Rematch?'):'Evenly matched! Rematch?';
+ $('popS').textContent=sb&&!user?'Log in from the lobby to save your wins.':'';
+ $('popR').hidden=gone;$('pop').hidden=false;
+ if(res==='win')confetti();
+}
+$('popR').onclick=()=>$('new').click();
+$('popC').onclick=()=>{$('pop').hidden=true};
+$('popL').onclick=()=>$('leave').click();
+function confetti(){
+ const c=$('confetti'),x=c.getContext('2d');c.width=innerWidth;c.height=innerHeight;
+ const cols=['#3fb8f5','#1d96d4','#ffc800','#ff4b4b','#58cc02','#ce82ff','#ff9600'];
+ const P=Array.from({length:180},()=>({x:Math.random()*c.width,y:-20-Math.random()*c.height*.5,vx:(Math.random()-.5)*4,vy:2+Math.random()*4,
+  w:6+Math.random()*8,h:4+Math.random()*6,r:Math.random()*6,vr:(Math.random()-.5)*.3,c:cols[Math.random()*cols.length|0]}));
+ const t0=performance.now();
+ (function f(t){
+  const el=t-t0;x.clearRect(0,0,c.width,c.height);
+  P.forEach(p=>{p.x+=p.vx+Math.sin(p.y/30)*.8;p.y+=p.vy;p.vy+=.03;p.r+=p.vr;
+   x.save();x.globalAlpha=Math.max(0,Math.min(1,(4500-el)/1200));x.translate(p.x,p.y);x.rotate(p.r);x.fillStyle=p.c;x.fillRect(-p.w/2,-p.h/2,p.w,p.h);x.restore()});
+  if(el<4500)requestAnimationFrame(f);else x.clearRect(0,0,c.width,c.height)})(t0);
+}
 
 st=init();sel=null;tg=new Set();last=[];refresh();
 requestAnimationFrame(frame);
