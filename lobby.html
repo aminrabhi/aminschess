@@ -419,7 +419,7 @@ $('amGo').onclick=async()=>{
  err.textContent='';
  if(!email||!password){err.textContent='enter your email and password';return}
  if(authMode==='up'){
-  if(username.length<3||username.length>20){err.textContent='username must be 3–20 characters';return}
+  if(username.length<3||username.length>20){err.textContent=`got "${username}" (${username.length} characters), needs 3–20`;return}
   const{data,error}=await sb.auth.signUp({email,password,options:{data:{username}}});
   if(error){err.textContent=error.message;return}
   if(!data.session){err.textContent='check your email to confirm your account, then log in ✉️';return}
