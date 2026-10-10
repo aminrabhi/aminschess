@@ -55,6 +55,16 @@ input{font:900 28px 'Nunito',sans-serif;text-align:center;letter-spacing:6px;tex
 .flat .pc{left:0;top:0;width:100%;height:100%;align-items:center;font-size:calc(var(--s)*.86);transform:none}
 .app.flat #rl,.app.flat #rr{display:none}
 
+/* board coordinates (a-h, 1-8) */
+.lb{position:absolute;inset:0;pointer-events:none;transform:translateZ(1px)}
+.lb i{position:absolute;display:none;font-style:normal;font-weight:900;line-height:1;font-size:max(9px,calc(var(--s)*.27))}
+.lb .rk{top:calc(var(--s)*.06);left:calc(var(--s)*.08)}
+.lb .fl{bottom:calc(var(--s)*.06);right:calc(var(--s)*.08)}
+.sq.rkon .lb .rk,.sq.flon .lb .fl{display:block}
+.sq.l .lb i{color:var(--dark)}
+.sq.d .lb i{color:var(--light)}
+.board.rot .lb{transform:translateZ(1px) rotate(180deg)}
+
 /* player cards */
 .pbar{display:flex;align-items:center;gap:10px;width:calc(var(--s)*8 + 6px);min-width:250px;background:#fff;border:2px solid var(--line);border-bottom-width:4px;border-radius:16px;padding:8px 12px;transition:box-shadow .2s,border-color .2s}
 .pbar.turn{border-color:var(--main);box-shadow:0 0 0 3px rgba(63,184,245,.28)}
@@ -272,7 +282,9 @@ const app=$('game'),board=$('board'),feed=$('feed'),lvl=$('lvl');
 const shadow=document.createElement('div');shadow.className='shadow';shadow.style.transform='translateZ(-26px)';board.appendChild(shadow);
 for(let i=1;i<=12;i++){const l=document.createElement('div');l.className='layer';l.style.transform='translateZ(-'+i+'px)';l.style.filter='brightness('+(1-i*.012)+')';board.appendChild(l)}
 const grid=document.createElement('div');grid.className='grid';board.appendChild(grid);
-const sqs=[];for(let i=0;i<64;i++){const d=document.createElement('div');d.onclick=()=>click(i);grid.appendChild(d);sqs.push(d)}
+const sqs=[];for(let i=0;i<64;i++){const d=document.createElement('div');d.onclick=()=>click(i);
+ d.innerHTML=`<div class="lb"><i class="rk">${8-(i>>3)}</i><i class="fl">${'abcdefgh'[i&7]}</i></div>`;
+ grid.appendChild(d);sqs.push(d)}
 let st,sel,tg,last,legalNow,chk,busy,gid=0,lastCard,rz=-20,rx=52,flat=false;
 let mode=null,myC='w',peer=null,conn=null,queue=[],gone=false,ended=false,me=null,opp=null;
 
@@ -298,7 +310,7 @@ function frame(){
 
 /* piece slide animation */
 function slide(f,to,k){
- const s=sqs[0].offsetWidth,pw=sqs[to].firstChild;if(!pw||!pw.animate)return;
+ const s=sqs[0].offsetWidth,pw=sqs[to].querySelector(':scope > .pw');if(!pw||!pw.animate)return;
  const sg=(flat&&myC==='b')?-1:1,dx=((f&7)-(to&7))*s*sg,dy=((f>>3)-(to>>3))*s*sg,lift=flat?24:s*(k==='n'?1.6:.8);
  pw.animate([{transform:`translate3d(${dx}px,${dy}px,0)`},
   {transform:`translate3d(${dx/2}px,${dy/2}px,${lift}px)`,offset:.5},
@@ -308,9 +320,11 @@ function animateMove(m){
  if(m.ca)slide(m.ca>0?m.f+3:m.f-4,m.ca>0?m.f+1:m.f-1,'r')}
 
 function render(){
+ const lf=myC==='w'?0:7,lr=myC==='w'?1:8;
+ board.classList.toggle('rot',myC==='b'&&!flat);
  for(let i=0;i<64;i++){const s=sqs[i],p=st.b[i];s.style.order=(flat&&myC==='b')?63-i:'';
-  s.className='sq '+(((i>>3)+(i&7))%2?'d':'l')+(sel===i?' sel':'')+(last.includes(i)?' last':'')+(tg.has(i)?' hint'+(p?' cap':''):'')+(chk===i?' chk':'');
-  let pw=s.firstChild;
+  s.className='sq '+(((i>>3)+(i&7))%2?'d':'l')+(sel===i?' sel':'')+(last.includes(i)?' last':'')+(tg.has(i)?' hint'+(p?' cap':''):'')+(chk===i?' chk':'')+((i&7)===lf?' rkon':'')+((8-(i>>3))===lr?' flon':'');
+  let pw=s.querySelector(':scope > .pw');
   if(p){if(!pw){pw=document.createElement('div');pw.className='pw';pw.innerHTML='<div class="pc"></div>';s.appendChild(pw)}
    const pc=pw.firstChild;pc.className='pc '+(isW(p)?'w':'b');pc.textContent=G[p.toLowerCase()]+'\uFE0E'}
   else if(pw)pw.remove()}}
