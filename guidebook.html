@@ -285,7 +285,7 @@ figcaption{font-size:13px;font-weight:800;color:#7a8b97;text-align:center;margin
 const $=id=>document.getElementById(id);
 const G={p:'♟',n:'♞',b:'♝',r:'♜',q:'♛',k:'♚'};
 
-/* ---- draw the little chess diagrams ---- */
+/* ---- chess diagrams ---- */
 function drawBoards(root){
  root.querySelectorAll('.bd').forEach(el=>{
   const list=s=>(s||'').split(/\s+/).filter(Boolean),pcs={},go=list(el.dataset.go),hit=list(el.dataset.hit);
