@@ -14,6 +14,7 @@
 body{margin:0;font-family:'Nunito','Trebuchet MS',system-ui,sans-serif;color:var(--ink);min-height:100vh;
  background:conic-gradient(#d9effc 25%,#f0f9ff 0 50%,#d9effc 0 75%,#f0f9ff 0) 0 0/90px 90px;animation:mv 14s linear infinite}
 @keyframes mv{to{background-position:180px 90px}}
+
 /* lobby */
 .lobby{position:relative;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:80px 20px 30px;text-align:center}
 .lobby h1{font-size:clamp(30px,5vw,52px);font-weight:900;margin:0}
@@ -24,12 +25,13 @@ input{font:900 28px 'Nunito',sans-serif;text-align:center;letter-spacing:6px;tex
 .code{font-size:46px;font-weight:900;letter-spacing:8px;color:var(--main)}
 .link{font-size:12px;word-break:break-all;color:#777}
 #msg{font-weight:800;color:#e0453f;min-height:24px}
+
 /* game */
 .app{display:grid;grid-template-columns:1fr 370px;min-height:100vh}
 .stage{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:16px}
 .logo{position:absolute;left:20px;top:14px;font-weight:900;font-size:28px;color:var(--main)}
 .logo a{color:inherit;text-decoration:none}
-.scene{perspective:1100px;width:100%;height:calc(var(--s)*9.6);display:flex;align-items:center;justify-content:center;cursor:grab;touch-action:none;user-select:none}
+.scene{perspective:1100px;width:100%;height:calc(var(--s)*8.4);display:flex;align-items:center;justify-content:center;cursor:grab;touch-action:none;user-select:none}
 .board{--rz:-20;position:relative;width:calc(var(--s)*8);height:calc(var(--s)*8);transform-style:preserve-3d}
 .grid{position:absolute;inset:0;display:grid;grid-template-columns:repeat(8,1fr);grid-template-rows:repeat(8,1fr);transform-style:preserve-3d;border:3px solid var(--base)}
 .sq{position:relative;transform-style:preserve-3d;cursor:pointer}
@@ -47,11 +49,23 @@ input{font:900 28px 'Nunito',sans-serif;text-align:center;letter-spacing:6px;tex
  transform:rotateZ(calc(var(--rz)*-1deg)) rotateX(-90deg);user-select:none}
 .pc.w{color:#fff;text-shadow:-1px 0 #2d2d2d,1px 0 #2d2d2d,0 -1px #2d2d2d,0 1px #2d2d2d,0 3px 0 #2d2d2d}
 .pc.b{color:#2b2b2b;text-shadow:0 0 1px #fff,0 2px 0 #000}
-.app.flat{--s:clamp(30px,min(10.5vw,8.2vh),82px)}
+.app.flat{--s:clamp(30px,min(10.5vw,7.2vh),82px)}
 .app.flat .scene{height:calc(var(--s)*8.5);cursor:default}
 .flat .layer,.flat .shadow{display:none}
 .flat .pc{left:0;top:0;width:100%;height:100%;align-items:center;font-size:calc(var(--s)*.86);transform:none}
 .app.flat #rl,.app.flat #rr{display:none}
+
+/* player cards */
+.pbar{display:flex;align-items:center;gap:10px;width:calc(var(--s)*8 + 6px);min-width:250px;background:#fff;border:2px solid var(--line);border-bottom-width:4px;border-radius:16px;padding:8px 12px;transition:box-shadow .2s,border-color .2s}
+.pbar.turn{border-color:var(--main);box-shadow:0 0 0 3px rgba(63,184,245,.28)}
+.pav{width:44px;height:44px;border-radius:10px;background:linear-gradient(160deg,#6fcbfa,#1d96d4);color:#fff;font-weight:900;font-size:22px;display:flex;align-items:center;justify-content:center;overflow:hidden;flex:none}
+.pav img.pi{width:100%;height:100%;object-fit:cover}
+.pn2{font-weight:900;font-size:17px;line-height:1.1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ps{font-size:12px;font-weight:800;color:#7a8b97}
+.pdot{margin-left:auto;font-size:18px}
+.mm{width:26px;height:26px;border-radius:8px;margin-right:8px;vertical-align:middle;object-fit:cover}
+span.mm{display:inline-flex;align-items:center;justify-content:center;background:#3fb8f5;color:#fff;font-weight:900}
+
 .btn{font:800 14px/1 'Nunito',sans-serif;letter-spacing:.8px;text-transform:uppercase;border-radius:14px;padding:12px 18px;cursor:pointer;
  border:2px solid var(--line);border-bottom-width:4px;background:#fff;color:var(--main-d)}
 .btn:active{transform:translateY(2px);border-bottom-width:2px}
@@ -73,7 +87,8 @@ select{font:800 14px 'Nunito',sans-serif;padding:11px;border-radius:12px;border:
 @media(max-width:900px){.app{grid-template-columns:1fr}.side{height:auto;max-height:55vh;position:static}
  :root{--s:clamp(26px,9vw,52px)}.stage{padding-top:52px}}
 
- .authbar{position:fixed;top:12px;right:14px;z-index:40;display:flex;gap:8px;align-items:center}
+/* accounts + popups */
+.authbar{position:fixed;top:12px;right:14px;z-index:40;display:flex;gap:8px;align-items:center}
 .ab{font-weight:800;background:#fff;border:2px solid var(--line);border-radius:14px;padding:10px 14px}
 .pop{position:fixed;inset:0;z-index:60;background:rgba(20,40,60,.45);display:flex;align-items:center;justify-content:center;padding:20px}
 .popc{background:#fff;border:2px solid var(--line);border-bottom-width:6px;border-radius:26px;padding:26px 28px;width:min(92vw,400px);text-align:center;display:flex;flex-direction:column;gap:12px;animation:pip .4s cubic-bezier(.2,1.4,.4,1)}
@@ -85,7 +100,6 @@ select{font:800 14px 'Nunito',sans-serif;padding:11px;border-radius:12px;border:
 input.tin{font:700 17px 'Nunito',sans-serif;letter-spacing:0;text-transform:none;text-align:left;width:100%;padding:12px 14px}
 .err{color:#e0453f;font-weight:800;font-size:14px;min-height:18px}
 .sw{background:none;border:0;color:var(--main-d);font:800 14px 'Nunito',sans-serif;cursor:pointer}
-
 </style>
 </head>
 <body>
@@ -116,7 +130,9 @@ input.tin{font:700 17px 'Nunito',sans-serif;letter-spacing:0;text-transform:none
 <div class="app" id="game" hidden>
  <div class="stage">
   <div class="logo">amin's chess</div>
+  <div class="pbar" id="pbTop"><div class="pav" id="pvTop"></div><div style="min-width:0"><div class="pn2" id="pnTop"></div><div class="ps" id="psTop"></div></div><div class="pdot" id="pdTop"></div></div>
   <div class="scene"><div class="board" id="board"></div></div>
+  <div class="pbar" id="pbBot"><div class="pav" id="pvBot"></div><div style="min-width:0"><div class="pn2" id="pnBot"></div><div class="ps" id="psBot"></div></div><div class="pdot" id="pdBot"></div></div>
   <div class="row">
    <button class="btn" id="rl">◀ view</button><button class="btn" id="rr">view ▶</button>
    <button class="btn" id="flat">flat board</button>
@@ -222,7 +238,7 @@ function desc(m,aft){let s;
 function coach(bef,m,aft){
  moveNo++;
  const all=scoreMoves(bef,2).sort((a,b)=>b.s-a.s),same=(x,y)=>x.f===y.f&&x.to===y.to;
- const me=all.find(x=>same(x.m,m)),bt=all[0],loss=bt.s-me.s,best=same(bt.m,m);
+ const mv=all.find(x=>same(x.m,m)),bt=all[0],loss=bt.s-mv.s,best=same(bt.m,m);
  let g,cl;
  if(best||loss<=15){g=best?'Best move! ⭐':'Great move!';cl='good'}
  else if(loss<=50){g='Good move';cl='ok'}
@@ -258,7 +274,7 @@ for(let i=1;i<=12;i++){const l=document.createElement('div');l.className='layer'
 const grid=document.createElement('div');grid.className='grid';board.appendChild(grid);
 const sqs=[];for(let i=0;i<64;i++){const d=document.createElement('div');d.onclick=()=>click(i);grid.appendChild(d);sqs.push(d)}
 let st,sel,tg,last,legalNow,chk,busy,gid=0,lastCard,rz=-20,rx=52,flat=false;
-let mode=null,myC='w',peer=null,conn=null,queue=[],gone=false;
+let mode=null,myC='w',peer=null,conn=null,queue=[],gone=false,ended=false,me=null,opp=null;
 
 /* mouse: tilt with movement, drag to spin */
 let mx=0,my=0,tx=0,ty=0,down=null,dragged=false;
@@ -274,7 +290,7 @@ addEventListener('pointerup',()=>{down=null;setTimeout(()=>{dragged=false},60)})
 function frame(){
  mx+=(tx-mx)*.06;my+=(ty-my)*.06;
  const fl=myC==='b'?180:0;
-if(flat){board.style.transform='none';board.style.setProperty('--rz',0)}
+ if(flat){board.style.transform='none';board.style.setProperty('--rz',0)}
  else{const a=rz+fl+mx*26,b=rx-my*10;
   board.style.setProperty('--rz',a);
   board.style.transform=`rotateX(${b}deg) rotateZ(${a}deg)`}
@@ -307,9 +323,9 @@ function refresh(){
   else t='Stalemate — it\'s a draw'}
  else t=(st.t===myC?'Your move':(mode==='bot'?'Bot is thinking…':'Opponent\'s move…'))+(ck?' — check!':'');
  $('status').textContent=t;
- const e=ev(st.b)/100*(myC==='w'?1:-1),opp=mode==='bot'?'Bot':'Opponent';
- $('evalb').textContent=Math.abs(e)<.3?'Position: about even':e>0?`You're ahead by ${e.toFixed(1)}`:`${opp} is ahead by ${(-e).toFixed(1)}`;
- render()}
+ const e=ev(st.b)/100*(myC==='w'?1:-1),oname=mode==='bot'?'Bot':'Opponent';
+ $('evalb').textContent=Math.abs(e)<.3?'Position: about even':e>0?`You're ahead by ${e.toFixed(1)}`:`${oname} is ahead by ${(-e).toFixed(1)}`;
+ render();turnBars();checkEnd()}
 function note(m,who){
  if(!lastCard)return;
  const d=document.createElement('div');d.className='bot';
@@ -331,26 +347,62 @@ function click(i){
  if(p&&(isW(p)?'w':'b')===myC){sel=i;tg=new Set(legalNow.filter(m=>m.f===i).map(m=>m.to))}else{sel=null;tg=new Set()}
  render()}
 function reset(c){
- gid++;myC=c;st=init();sel=null;tg=new Set();last=[];busy=false;moveNo=0;lastCard=null;gone=false;feed.innerHTML='';
+ gid++;ended=false;$('pop').hidden=true;
+ myC=c;st=init();sel=null;tg=new Set();last=[];busy=false;moveNo=0;lastCard=null;gone=false;feed.innerHTML='';
  const net=mode==='net',el=document.createElement('div');el.className='card info';
  el.innerHTML=net
   ?`<b>You're playing ${c==='w'?'white':'black'} 🎮</b><p>${c==='w'?'You move first.':'White moves first — hang tight.'} Tap a piece, then where to move it. After each of your moves I'll grade it and tell you how you could have done better.</p>`
   :'<b>Welcome! 👋</b><p>You are white — tap a piece, then tap where to move it. After every move I\'ll grade it and tell you how you could have done better.</p><p>Move your mouse to tilt the board, or click and drag to spin it. Tap "flat board" for a top-down view.</p>';
  feed.appendChild(el);
- lvl.hidden=net;$('new').textContent=net?'rematch':'new game';refresh()}
+ lvl.hidden=net;$('new').textContent=net?'rematch':'new game';refresh();setBars()}
+
+/* ---------- player cards (avatars + names) ---------- */
+function safeAv(u){
+ const base=SUPABASE_URL.replace(/\/+$/,'')+'/storage/v1/object/public/avatars/';
+ return u&&sb&&u.startsWith(base)?u:null}
+function avatarNode(url,name,cls){
+ const letter=()=>{const s=document.createElement('span');s.className=cls;s.textContent=(name||'?').trim()[0].toUpperCase();return s};
+ const u=safeAv(url);if(!u)return letter();
+ const i=document.createElement('img');i.className=cls;i.alt='';i.src=u;i.onerror=()=>i.replaceWith(letter());return i}
+function fillBar(k,o){
+ const v=$('pv'+k);v.innerHTML='';
+ if(o.emoji)v.textContent=o.emoji;else v.appendChild(avatarNode(o.avatar,o.name,'pi'));
+ $('pn'+k).textContent=o.name;$('ps'+k).textContent=o.sub||''}
+function setBars(){
+ const mine=me?{name:me.username,avatar:me.avatar_url,sub:`${me.wins}W ${me.losses}L ${me.draws}D`}:{name:'You',sub:'not logged in'};
+ let o;
+ if(mode==='bot')o={name:'Bot',emoji:'🤖',sub:['easy','medium','hard'][lvl.value-1]+' level'};
+ else o=opp?{name:opp.name,avatar:opp.avatar,sub:opp.guest?'guest':`${opp.w}W ${opp.l}L ${opp.dr}D`}:{name:'Opponent',sub:'connecting…'};
+ fillBar('Top',o);fillBar('Bot',mine);
+ $('pdTop').textContent=myC==='w'?'⚫':'⚪';$('pdBot').textContent=myC==='w'?'⚪':'⚫'}
+function turnBars(){
+ if(app.hidden||!st)return;
+ const on=legalNow&&legalNow.length>0;
+ $('pbBot').classList.toggle('turn',on&&st.t===myC);$('pbTop').classList.toggle('turn',on&&st.t!==myC)}
+async function oppInfo(d){
+ opp={name:'Guest',avatar:null,guest:true};setBars();
+ if(!sb||typeof d.id!=='string'||!/^[0-9a-f-]{36}$/i.test(d.id))return;
+ const{data}=await sb.from('profiles').select('username,wins,losses,draws,avatar_url').eq('id',d.id).single();
+ if(data){opp={name:data.username,avatar:data.avatar_url,w:data.wins,l:data.losses,dr:data.draws};setBars()}}
+lvl.onchange=setBars;
 
 /* ---------- lobby + multiplayer (PeerJS) ---------- */
 const say=t=>{$('msg').textContent=t};
-function show(v){$('lobby').hidden=v!=='lobby';app.hidden=v!=='game'}
-function cleanup(){try{conn&&conn.close()}catch(e){}try{peer&&peer.destroy()}catch(e){}conn=peer=null;queue=[]}
+function show(v){$('lobby').hidden=v!=='lobby';app.hidden=v!=='game';$('authbar').hidden=v!=='lobby';if(v!=='game')$('pop').hidden=true}
+function cleanup(){try{conn&&conn.close()}catch(e){}try{peer&&peer.destroy()}catch(e){}conn=peer=null;queue=[];opp=null}
 function hostReset(){$('hostbox').innerHTML='<button class="btn go" id="host">host lobby</button>';$('host').onclick=host}
 function genCode(){const a='ABCDEFGHJKLMNPQRSTUVWXYZ';let c='';for(let i=0;i<4;i++)c+=a[Math.random()*a.length|0];return c}
-function startNet(c){if(mode==='net'&&!app.hidden)return;mode='net';show('game');reset(c)}
+function startNet(c){
+ if(mode==='net'&&!app.hidden)return;
+ mode='net';show('game');reset(c);
+ if(conn&&conn.open)conn.send({t:'hi',id:user?user.id:null})}
 function wire(c){
  c.on('data',d=>{if(busy)queue.push(d);else handle(d)});
  c.on('close',()=>{if(mode==='net'){gone=true;if(st)refresh()}});
 }
 function handle(d){
+ if(!d)return;
+ if(d.t==='hi'){oppInfo(d);return}
  if(d.t==='move'){
   if(st.t===myC||!legalNow.length)return;
   const m=legalNow.find(x=>x.f===d.f&&x.to===d.to);if(!m)return;
@@ -392,7 +444,6 @@ $('rl').onclick=()=>{rz-=15};
 $('rr').onclick=()=>{rz+=15};
 $('flat').onclick=function(){flat=!flat;app.classList.toggle('flat',flat);this.textContent=flat?'3D board':'flat board';render()};
 
-
 /* ===== accounts (Supabase) ===== */
 const SUPABASE_URL='https://hoamwvhwnleznwohjslp.supabase.co/',SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvYW13dmh3bmxlem53b2hqc2xwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE2MzQzNTksImV4cCI6MjEwNzIxMDM1OX0.CprU4jwW0-emz4zXWAiI2ZAy1nXrTrtm5NCSSeJX-A4';
 const sb=(typeof supabase!=='undefined'&&!SUPABASE_URL.includes('YOUR-'))?supabase.createClient(SUPABASE_URL,SUPABASE_KEY):null;
@@ -400,15 +451,17 @@ let user=null,authMode='in';
 async function loadProfile(){
  const bar=$('authbar');
  if(!sb){bar.innerHTML='<span class="ab">accounts not set up yet</span>';return}
- if(!user){
+ if(!user){me=null;
   bar.innerHTML='<button class="btn" id="abIn">log in</button><button class="btn go" id="abUp">sign up</button>';
   $('abIn').onclick=()=>openAuth('in');$('abUp').onclick=()=>openAuth('up');return}
- const{data}=await sb.from('profiles').select('username,wins,losses,draws').eq('id',user.id).single();
- const p=data||{username:'player',wins:0,losses:0,draws:0};
- bar.innerHTML=`<a class="ab" href="profile.html" style="text-decoration:none;color:inherit">👤 <b></b> · ${p.wins}W ${p.losses}L ${p.draws}D</a><button class="btn" id="abOut">log out</button>`
-;
+ const{data}=await sb.from('profiles').select('username,wins,losses,draws,avatar_url').eq('id',user.id).single();
+ const p=data||{username:'player',wins:0,losses:0,draws:0,avatar_url:null};
+ me={id:user.id,...p};
+ bar.innerHTML=`<a class="ab" href="profile.html" style="text-decoration:none;color:inherit"><span id="abAv"></span><b></b> · ${p.wins}W ${p.losses}L ${p.draws}D</a><button class="btn" id="abOut">log out</button>`;
+ $('abAv').replaceWith(avatarNode(p.avatar_url,p.username,'mm'));
  bar.querySelector('b').textContent=p.username;
  $('abOut').onclick=()=>sb.auth.signOut();
+ if(!app.hidden)setBars();
 }
 function openAuth(m){
  authMode=m;$('amT').textContent=m==='in'?'Log in':'Create account';$('amU').hidden=m==='in';
@@ -433,10 +486,6 @@ $('amGo').onclick=async()=>{
 if(sb)sb.auth.onAuthStateChange((_e,s)=>{user=s?s.user:null;setTimeout(loadProfile,0)});else loadProfile();
 
 /* ===== win popup + confetti ===== */
-let ended=false;
-const _reset=reset;reset=function(c){ended=false;$('pop').hidden=true;_reset(c)};
-const _refresh=refresh;refresh=function(){_refresh();checkEnd()};
-const _show=show;show=function(v){_show(v);$('authbar').hidden=v!=='lobby';if(v!=='game')$('pop').hidden=true};
 function checkEnd(){
  if(ended||gone||!st||legalNow.length||app.hidden)return;
  ended=true;
