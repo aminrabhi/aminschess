@@ -26,11 +26,18 @@ body{margin:0;font-family:'Nunito','Trebuchet MS',system-ui,sans-serif;color:var
 .sq.hint.cap::after{inset:6%;background:none;border:4px solid rgba(255,60,60,.8)}
 .layer{position:absolute;inset:0;background:var(--base);border-radius:4px}
 .shadow{position:absolute;inset:-6%;background:rgba(0,0,0,.22);filter:blur(18px);border-radius:12px}
+.pw{position:absolute;inset:0;transform-style:preserve-3d}
 .pc{position:absolute;left:calc(50% - var(--s)*.65);top:calc(50% - var(--s)*1.3);width:calc(var(--s)*1.3);height:calc(var(--s)*1.3);
  display:flex;align-items:flex-end;justify-content:center;font-size:calc(var(--s)*1.15);line-height:1;transform-origin:50% 100%;
  transform:rotateZ(calc(var(--rz)*-1deg)) rotateX(-90deg);user-select:none}
 .pc.w{color:#fff;text-shadow:-1px 0 #2d2d2d,1px 0 #2d2d2d,0 -1px #2d2d2d,0 1px #2d2d2d,0 3px 0 #2d2d2d}
 .pc.b{color:#2b2b2b;text-shadow:0 0 1px #fff,0 2px 0 #000}
+/* flat (top-down) mode */
+.app.flat{--s:clamp(30px,min(10.5vw,8.2vh),82px)}
+.app.flat .scene{height:calc(var(--s)*8.5);cursor:default}
+.flat .layer,.flat .shadow{display:none}
+.flat .pc{left:0;top:0;width:100%;height:100%;align-items:center;font-size:calc(var(--s)*.86);transform:none}
+.app.flat #rl,.app.flat #rr{display:none}
 .btn{font:800 14px/1 'Nunito',sans-serif;letter-spacing:.8px;text-transform:uppercase;border-radius:14px;padding:12px 18px;cursor:pointer;
  border:2px solid var(--line);border-bottom-width:4px;background:#fff;color:var(--main-d)}
 .btn:active{transform:translateY(2px);border-bottom-width:2px}
@@ -60,6 +67,7 @@ select{font:800 14px 'Nunito',sans-serif;padding:11px;border-radius:12px;border:
   <div class="scene"><div class="board" id="board"></div></div>
   <div class="row">
    <button class="btn" id="rl">◀ view</button><button class="btn" id="rr">view ▶</button>
+   <button class="btn" id="flat">flat board</button>
    <select id="lvl"><option value="1">easy bot</option><option value="2" selected>medium bot</option><option value="3">hard bot</option></select>
    <button class="btn go" id="new">new game</button>
   </div>
@@ -172,12 +180,12 @@ function coach(bef,m,aft){
  feed.insertBefore(el,feed.firstChild);lastCard=el}
 
 /* ---------- 3D board + game flow ---------- */
-const board=document.getElementById('board'),feed=document.getElementById('feed'),lvl=document.getElementById('lvl');
+const app=document.querySelector('.app'),board=document.getElementById('board'),feed=document.getElementById('feed'),lvl=document.getElementById('lvl');
 const shadow=document.createElement('div');shadow.className='shadow';shadow.style.transform='translateZ(-26px)';board.appendChild(shadow);
 for(let i=1;i<=12;i++){const l=document.createElement('div');l.className='layer';l.style.transform='translateZ(-'+i+'px)';l.style.filter='brightness('+(1-i*.012)+')';board.appendChild(l)}
 const grid=document.createElement('div');grid.className='grid';board.appendChild(grid);
 const sqs=[];for(let i=0;i<64;i++){const d=document.createElement('div');d.onclick=()=>click(i);grid.appendChild(d);sqs.push(d)}
-let st,sel,tg,last,legalNow,chk,busy,gid=0,lastCard,rz=-20,rx=52;
+let st,sel,tg,last,legalNow,chk,busy,gid=0,lastCard,rz=-20,rx=52,flat=false;
 
 /* mouse: tilt with movement, drag to spin */
 let mx=0,my=0,tx=0,ty=0,down=null,dragged=false;
@@ -187,22 +195,35 @@ addEventListener('pointermove',e=>{
   if(Math.abs(e.clientX-down.x)+Math.abs(e.clientY-down.y)>6)dragged=true;
   if(dragged){rz+=(e.clientX-down.lx)*.4;rx=Math.max(20,Math.min(80,rx-(e.clientY-down.ly)*.3))}
   down.lx=e.clientX;down.ly=e.clientY}});
-addEventListener('pointerdown',e=>{if(e.target.closest('button,select,.side'))return;
+addEventListener('pointerdown',e=>{if(flat||e.target.closest('button,select,.side'))return;
  down={x:e.clientX,y:e.clientY,lx:e.clientX,ly:e.clientY};dragged=false});
 addEventListener('pointerup',()=>{down=null;setTimeout(()=>{dragged=false},60)});
 function frame(){
  mx+=(tx-mx)*.06;my+=(ty-my)*.06;
- const a=rz+mx*26,b=rx-my*10;
- board.style.setProperty('--rz',a);
- board.style.transform=`rotateX(${b}deg) rotateZ(${a}deg)`;
+ if(flat){board.style.transform='none';board.style.setProperty('--rz',0)}
+ else{const a=rz+mx*26,b=rx-my*10;
+  board.style.setProperty('--rz',a);
+  board.style.transform=`rotateX(${b}deg) rotateZ(${a}deg)`}
  requestAnimationFrame(frame)}
+
+/* piece slide animation */
+function slide(f,to,k){
+ const s=sqs[0].offsetWidth,pw=sqs[to].firstChild;if(!pw||!pw.animate)return;
+ const dx=((f&7)-(to&7))*s,dy=((f>>3)-(to>>3))*s,lift=flat?24:s*(k==='n'?1.6:.8);
+ pw.animate([{transform:`translate3d(${dx}px,${dy}px,0)`},
+  {transform:`translate3d(${dx/2}px,${dy/2}px,${lift}px)`,offset:.5},
+  {transform:'translate3d(0,0,0)'}],{duration:360,easing:'ease-in-out'})}
+function animateMove(m){
+ slide(m.f,m.to,m.p.toLowerCase());
+ if(m.ca)slide(m.ca>0?m.f+3:m.f-4,m.ca>0?m.f+1:m.f-1,'r')}
 
 function render(){
  for(let i=0;i<64;i++){const s=sqs[i],p=st.b[i];
   s.className='sq '+(((i>>3)+(i&7))%2?'d':'l')+(sel===i?' sel':'')+(last.includes(i)?' last':'')+(tg.has(i)?' hint'+(p?' cap':''):'')+(chk===i?' chk':'');
-  let pc=s.firstChild;
-  if(p){if(!pc){pc=document.createElement('div');s.appendChild(pc)}pc.className='pc '+(isW(p)?'w':'b');pc.textContent=G[p.toLowerCase()]+'\uFE0E'}
-  else if(pc)pc.remove()}}
+  let pw=s.firstChild;
+  if(p){if(!pw){pw=document.createElement('div');pw.className='pw';pw.innerHTML='<div class="pc"></div>';s.appendChild(pw)}
+   const pc=pw.firstChild;pc.className='pc '+(isW(p)?'w':'b');pc.textContent=G[p.toLowerCase()]+'\uFE0E'}
+  else if(pw)pw.remove()}}
 function refresh(){
  legalNow=legal(st);const ck=inCheck(st);chk=ck?st.b.indexOf(st.t==='w'?'K':'k'):-1;
  let t;
@@ -213,13 +234,13 @@ function refresh(){
  render()}
 function botMove(){
  const l=+lvl.value,s=scoreMoves(st,l).sort((a,b)=>b.s-a.s),pool=s.filter(x=>x.s>=s[0].s-(l===1?80:l===2?15:5)),m=pool[Math.random()*pool.length|0].m;
- st=make(st,m);last=[m.f,m.to];refresh();
+ st=make(st,m);last=[m.f,m.to];refresh();animateMove(m);
  if(lastCard){const d=document.createElement('div');d.className='bot';d.textContent=`Bot replied: ${nm(m.p)} ${sqn(m.f)} → ${sqn(m.to)}${m.cap?' (captured your '+nm(m.cap)+')':''}`;lastCard.appendChild(d)}}
 function play(m){
- busy=true;const g=gid,bef=st;st=make(st,m);last=[m.f,m.to];sel=null;tg=new Set();refresh();
+ busy=true;const g=gid,bef=st;st=make(st,m);last=[m.f,m.to];sel=null;tg=new Set();refresh();animateMove(m);
  setTimeout(()=>{if(g!==gid)return;coach(bef,m,st);
   if(!legalNow.length){busy=false;return}
-  setTimeout(()=>{if(g!==gid)return;botMove();busy=false},60)},40)}
+  setTimeout(()=>{if(g!==gid)return;botMove();busy=false},60)},400)}
 function click(i){
  if(dragged||busy||st.t!=='w'||!legalNow.length)return;
  const mv=sel!==null&&legalNow.find(m=>m.f===sel&&m.to===i);if(mv)return play(mv);
@@ -228,11 +249,12 @@ function click(i){
  render()}
 function newGame(){gid++;st=init();sel=null;tg=new Set();last=[];busy=false;moveNo=0;lastCard=null;feed.innerHTML='';
  const el=document.createElement('div');el.className='card info';
- el.innerHTML='<b>Welcome! 👋</b><p>You are white — tap a piece, then tap where to move it. After every move I\'ll grade it and tell you how you could have done better.</p><p>Move your mouse to tilt the board, or click and drag to spin it.</p>';
+ el.innerHTML='<b>Welcome! 👋</b><p>You are white — tap a piece, then tap where to move it. After every move I\'ll grade it and tell you how you could have done better.</p><p>Move your mouse to tilt the board, or click and drag to spin it. Tap "flat board" for a top-down view.</p>';
  feed.appendChild(el);refresh()}
 document.getElementById('new').onclick=newGame;
 document.getElementById('rl').onclick=()=>{rz-=15};
 document.getElementById('rr').onclick=()=>{rz+=15};
+document.getElementById('flat').onclick=function(){flat=!flat;app.classList.toggle('flat',flat);this.textContent=flat?'3D board':'flat board'};
 newGame();requestAnimationFrame(frame);
 </script>
 </body>
