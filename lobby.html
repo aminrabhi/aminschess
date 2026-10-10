@@ -405,7 +405,8 @@ async function loadProfile(){
   $('abIn').onclick=()=>openAuth('in');$('abUp').onclick=()=>openAuth('up');return}
  const{data}=await sb.from('profiles').select('username,wins,losses,draws').eq('id',user.id).single();
  const p=data||{username:'player',wins:0,losses:0,draws:0};
- bar.innerHTML=`<span class="ab">👤 <b></b> · ${p.wins}W ${p.losses}L ${p.draws}D</span><button class="btn" id="abOut">log out</button>`;
+ bar.innerHTML=`<a class="ab" href="profile.html" style="text-decoration:none;color:inherit">👤 <b></b> · ${p.wins}W ${p.losses}L ${p.draws}D</a><button class="btn" id="abOut">log out</button>`
+;
  bar.querySelector('b').textContent=p.username;
  $('abOut').onclick=()=>sb.auth.signOut();
 }

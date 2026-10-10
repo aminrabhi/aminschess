@@ -1,1 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>amin's chess – profile</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<style>
+:root{--main:#3fb8f5;--main-d:#1d96d4;--ink:#3c3c3c;--line:#e5e5e5}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;min-height:100vh;font-family:'Nunito','Trebuchet MS',system-ui,sans-serif;color:var(--ink);
+ background:conic-gradient(#d9effc 25%,#f0f9ff 0 50%,#d9effc 0 75%,#f0f9ff 0) 0 0/90px 90px;animation:mv 14s linear infinite;
+ display:flex;justify-content:center;align-items:flex-start;padding:90px 16px 40px}
+@keyframes mv{to{background-position:180px 90px}}
+.top{position:fixed;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:12px 20px;z-index:10}
+.logo{font-weight:900;font-size:28px;color:var(--main);text-decoration:none}
+.nav{display:flex;gap:8px}
+.btn{font:800 14px/1 'Nunito',sans-serif;letter-spacing:.8px;text-transform:uppercase;border-radius:14px;padding:13px 20px;cursor:pointer;
+ border:2px solid var(--line);border-bottom-width:4px;background:#fff;color:var(--main-d);text-decoration:none;display:inline-block}
+.btn:active{transform:translateY(2px);border-bottom-width:2px}
+.btn.go{background:var(--main);color:#fff;border:0;border-bottom:4px solid var(--main-d)}
+.card{width:min(100%,560px);background:#fff;border:2px solid var(--line);border-bottom-width:6px;border-radius:28px;padding:32px 26px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:12px}
+h1{margin:6px 0 0;font-size:clamp(28px,6vw,38px);font-weight:900;line-height:1.1;word-break:break-word}
+.since{font-weight:800;color:#7a8b97;font-size:14px}
+#msg{min-height:20px;font-weight:800;font-size:14px;color:#7a8b97}
 
+/* avatar */
+.av{position:relative;width:150px;height:150px;border-radius:50%;border:6px solid #fff;box-shadow:0 0 0 4px var(--main),0 10px 22px rgba(31,111,163,.25);
+ background:linear-gradient(160deg,#6fcbfa,#1d96d4);display:flex;align-items:center;justify-content:center;cursor:pointer}
+.av img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.av span{font-size:64px;font-weight:900;color:#fff}
+.av.busy{opacity:.55;pointer-events:none}
+.cam{position:absolute;right:-4px;bottom:-4px;width:46px;height:46px;border-radius:50%;border:3px solid #fff;background:var(--main);font-size:20px;cursor:pointer;
+ box-shadow:0 3px 0 var(--main-d)}
+
+/* stats */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:100%;margin-top:8px}
+.st{border:2px solid var(--line);border-bottom-width:4px;border-radius:18px;padding:14px 6px}
+.st b{display:block;font-size:30px;font-weight:900;line-height:1.1}
+.st small{display:block;font-size:12px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;color:#7a8b97;margin-top:4px}
+.st .e{font-size:22px}
+.bar{display:flex;width:100%;height:16px;border-radius:99px;overflow:hidden;background:#eef5fa;border:2px solid var(--line)}
+.bar i{display:block;height:100%;transition:width .6s}
+.legend{font-size:12px;font-weight:800;color:#7a8b97}
+.row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:8px}
+</style>
+</head>
+<body>
+
+<div class="top">
+ <a class="logo" href="index.html">amin's chess</a>
+ <div class="nav"><a class="btn" href="guidebook.html">guidebook</a><a class="btn go" href="lobby.html">play</a></div>
+</div>
+
+<!-- shown when logged in -->
+<main class="card" id="card" hidden>
+ <div class="av" id="av" title="change photo">
+  <img id="avImg" alt="your profile picture" hidden>
+  <span id="avTxt">?</span>
+  <button class="cam" id="cam" aria-label="change photo">📷</button>
+ </div>
+ <input type="file" id="file" accept="image/*" hidden>
+ <h1 id="uname"></h1>
+ <div class="since" id="since"></div>
+ <div id="msg"></div>
+ <button class="btn" id="chg">change photo</button>
+
+ <div class="stats">
+  <div class="st"><span class="e">🏆</span><b id="sW">0</b><small>wins</small></div>
+  <div class="st"><span class="e">💔</span><b id="sL">0</b><small>losses</small></div>
+  <div class="st"><span class="e">🤝</span><b id="sD">0</b><small>draws</small></div>
+  <div class="st"><span class="e">♟</span><b id="sG">0</b><small>games</small></div>
+  <div class="st" style="grid-column:span 2"><span class="e">📈</span><b id="sR">0%</b><small>win rate</small></div>
+ </div>
+ <div class="bar"><i id="bW" style="background:#3fb8f5"></i><i id="bD" style="background:#ffc800"></i><i id="bL" style="background:#ff6b6b"></i></div>
+ <div class="legend">🟦 wins &nbsp; 🟨 draws &nbsp; 🟥 losses</div>
+
+ <div class="row"><a class="btn go" href="lobby.html">play a game</a><button class="btn" id="out">log out</button></div>
+</main>
+
+<!-- shown when logged out or something's missing -->
+<main class="card" id="gate" hidden>
+ <div style="font-size:60px">♟</div>
+ <h1 id="gateT"></h1>
+ <p id="gateP" style="margin:0;font-weight:700;color:#777"></p>
+ <a class="btn go" id="gateB" href="lobby.html">go to the lobby to log in</a>
+</main>
+
+<script>
+const SUPABASE_URL='https://hoamwvhwnleznwohjslp.supabase.co/',SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvYW13dmh3bmxlem53b2hqc2xwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE2MzQzNTksImV4cCI6MjEwNzIxMDM1OX0.CprU4jwW0-emz4zXWAiI2ZAy1nXrTrtm5NCSSeJX-A4';
+const $=id=>document.getElementById(id);
+const sb=(typeof supabase!=='undefined'&&!SUPABASE_URL.includes('YOUR-'))?supabase.createClient(SUPABASE_URL,SUPABASE_KEY):null;
+let user=null;
+
+function say(t,bad){$('msg').textContent=t;$('msg').style.color=bad?'#e0453f':'#7a8b97'}
+function gate(title,text,showLogin){
+ $('card').hidden=true;$('gate').hidden=false;
+ $('gateT').textContent=title;$('gateP').textContent=text;$('gateB').hidden=!showLogin}
+
+function showAvatar(url,name){
+ const img=$('avImg');
+ if(url){img.onerror=()=>showAvatar(null,name);img.src=url;img.hidden=false;$('avTxt').hidden=true}
+ else{img.hidden=true;$('avTxt').hidden=false;$('avTxt').textContent=(name||'?').trim()[0].toUpperCase()}}
+
+function render(p){
+ $('gate').hidden=true;$('card').hidden=false;
+ $('uname').textContent=p.username;
+ $('since').textContent='Member since '+new Date(p.created_at).toLocaleDateString(undefined,{month:'long',year:'numeric'});
+ const g=p.wins+p.losses+p.draws;
+ $('sW').textContent=p.wins;$('sL').textContent=p.losses;$('sD').textContent=p.draws;$('sG').textContent=g;
+ $('sR').textContent=(g?Math.round(p.wins/g*100):0)+'%';
+ $('bW').style.width=(g?p.wins/g*100:0)+'%';$('bD').style.width=(g?p.draws/g*100:0)+'%';$('bL').style.width=(g?p.losses/g*100:0)+'%';
+ showAvatar(p.avatar_url,p.username)}
+
+async function load(){
+ if(!sb){gate('Accounts not set up','Add your Supabase URL and key at the top of this file.',false);return}
+ const{data:{session}}=await sb.auth.getSession();
+ user=session?session.user:null;
+ if(!user){gate('You\'re not logged in','Log in from the lobby, then come back to see your profile and stats.',true);return}
+ const{data,error}=await sb.from('profiles').select('username,wins,losses,draws,avatar_url,created_at').eq('id',user.id).single();
+ if(error||!data){gate('Couldn\'t load your profile',error?error.message:'profile not found',false);return}
+ render(data)}
+
+/* crop to a centered square and shrink it, so uploads are tiny and fast */
+function toSquareBlob(file,size=256){
+ return new Promise((res,rej)=>{
+  const url=URL.createObjectURL(file),img=new Image();
+  img.onload=()=>{
+   const s=Math.min(img.naturalWidth,img.naturalHeight),sx=(img.naturalWidth-s)/2,sy=(img.naturalHeight-s)/2;
+   const c=document.createElement('canvas');c.width=c.height=size;
+   c.getContext('2d').drawImage(img,sx,sy,s,s,0,0,size,size);
+   URL.revokeObjectURL(url);
+   c.toBlob(b=>b?res(b):rej(new Error('could not process that image')),'image/jpeg',.88)};
+  img.onerror=()=>{URL.revokeObjectURL(url);rej(new Error('couldn\'t read that image, try a JPG or PNG'))};
+  img.src=url})}
+
+$('file').onchange=async e=>{
+ const f=e.target.files[0];e.target.value='';
+ if(!f||!user)return;
+ if(!f.type.startsWith('image/')){say('please choose an image file',true);return}
+ if(f.size>15*1024*1024){say('that file is too big (max 15 MB)',true);return}
+ try{
+  $('av').classList.add('busy');say('saving your photo…');
+  const blob=await toSquareBlob(f);
+  showAvatar(URL.createObjectURL(blob),$('uname').textContent);       // instant preview
+  const path=user.id+'/avatar.jpg';
+  const up=await sb.storage.from('avatars').upload(path,blob,{upsert:true,contentType:'image/jpeg',cacheControl:'3600'});
+  if(up.error)throw up.error;
+  const url=sb.storage.from('avatars').getPublicUrl(path).data.publicUrl+'?v='+Date.now();
+  const r=await sb.rpc('set_avatar',{u:url});
+  if(r.error)throw r.error;
+  showAvatar(url,$('uname').textContent);say('photo saved ✓');
+ }catch(err){say(err.message||'upload failed',true);load()}
+ finally{$('av').classList.remove('busy')}};
+
+$('chg').onclick=$('cam').onclick=ev=>{ev.stopPropagation();$('file').click()};
+$('av').onclick=()=>$('file').click();
+$('out').onclick=async()=>{await sb.auth.signOut();location.href='lobby.html'};
+load();
+</script>
+</body>
+</html>
