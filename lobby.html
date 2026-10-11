@@ -466,7 +466,7 @@ async function loadProfile(){
  const bar=$('authbar');
  if(!sb){bar.innerHTML='<span class="ab">accounts not set up yet</span>';return}
  if(!user){me=null;
-  bar.innerHTML='<button class="btn" id="abIn">log in</button><button class="btn go" id="abUp">sign up</button>';
+  bar.innerHTML='<div class="nav"><a class="btn" href="guidebook.html">guidebook</a><a class="btn go" href="lobby.html">play</a></div><button class="btn" id="abIn">log in</button><button class="btn go" id="abUp">sign up</button>';
   $('abIn').onclick=()=>openAuth('in');$('abUp').onclick=()=>openAuth('up');return}
  const{data}=await sb.from('profiles').select('username,wins,losses,draws,avatar_url').eq('id',user.id).single();
  const p=data||{username:'player',wins:0,losses:0,draws:0,avatar_url:null};
