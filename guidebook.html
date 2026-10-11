@@ -116,6 +116,7 @@ figcaption{font-size:13px;font-weight:800;color:#7a8b97;text-align:center;margin
    Copy any section block and paste it inside a chapter. Pages go in the order they are written.
  ADD A NEW CHAPTER
    Copy a whole chapter block (div class="chapter"), paste it inside a unit, change data-title and data-icon.
+   Every chapter ends with exactly ONE closing div. Every unit ends with exactly ONE closing div.
  ADD A NEW UNIT
    Copy a whole unit block (div class="unit"), paste it below the others, change data-title.
  Page numbers, flipping, the menu and the progress bar all update by themselves.
@@ -136,10 +137,12 @@ figcaption{font-size:13px;font-weight:800;color:#7a8b97;text-align:center;margin
      <div class="figs"><figure><div class="bd" ...></div><figcaption>caption</figcaption></figure></div>
 =================================================================== -->
 <div id="library" hidden>
-<div class="unit" data-title="Unit 1: the pieces">
+
+<!-- ################################ UNIT 1 ################################ -->
+<div class="unit" data-title="Unit 1: The pieces">
 
 <!-- ============ CHAPTER 1: PAWN ============ -->
-<div class="chapter" data-title="Chapter 1: the pawn" data-icon="♟&#xFE0E;">
+<div class="chapter" data-title="Chapter 1: The pawn" data-icon="♟&#xFE0E;">
 
 <section class="cover">
  <div class="big">♟&#xFE0E;</div>
@@ -224,7 +227,7 @@ figcaption{font-size:13px;font-weight:800;color:#7a8b97;text-align:center;margin
 
 </div>
 
- <!-- ============ CHAPTER 2: KNIGHT ============ -->
+<!-- ============ CHAPTER 2: KNIGHT ============ -->
 <div class="chapter" data-title="Chapter 2: The knight" data-icon="♞&#xFE0E;">
 
 <section class="cover">
@@ -276,6 +279,7 @@ figcaption{font-size:13px;font-weight:800;color:#7a8b97;text-align:center;margin
 
 <!-- ============ CHAPTER 3: BISHOP ============ -->
 <div class="chapter" data-title="Chapter 3: The bishop" data-icon="♝&#xFE0E;">
+
 <section class="cover">
  <div class="big">♝&#xFE0E;</div>
  <h2>the bishop</h2>
@@ -284,45 +288,39 @@ figcaption{font-size:13px;font-weight:800;color:#7a8b97;text-align:center;margin
 </section>
 
 <section>
-  <div class="kick">chapter 3 · the bishop</div>
-  <h2>meet the bishop</h2>
-  <p>Each player has <b>2 bishops</b>, standing next ot the king and queen. A bishop is worth <b>3 points</b>.</p>
-  <p>Bishops move <b>diagonally</b>, as many squares as they like, as long as nothing is in the way.</p>
-  <div class="figs"><figure style="max-width:250px">
+ <div class="kick">chapter 3 · the bishop</div>
+ <h2>meet the bishop</h2>
+ <p>Each player has <b>2 bishops</b>, standing next to the king and queen. A bishop is worth <b>3 points</b>.</p>
+ <p>Bishops move <b>diagonally</b>, as many squares as they like, as long as nothing is in the way.</p>
+ <div class="figs"><figure style="max-width:250px">
   <div class="bd" data-p="wB d4" data-go="a1 b2 c3 e5 f6 g7 h8 a7 b6 c5 e3 f2 g1" data-anim="d4 g7"></div>
   <figcaption>A bishop on d4 can slide along both diagonals</figcaption>
-  </figure></div>
+ </figure></div>
 </section>
 
 <section>
-  <div class="kick">chapter 3 · the bishop</div>
-  <h2>one color forever</h2>
-  <p>A bishop always stays on the <b>same color</b> squares. The bishop that starts on a dark square only ever visits dark squares. That's why every player gets one of each!</p>
-  <div class="figs">
-    <figure>
-      <div class ="bd" data-p="wB c1 f1, bB c8 f8"></div>
-      <figcaption>One bishop for dark squares, one for light</figcaption>
-    </figure>
-    <figure>
-      <div class="bd" data-p="wB d4, wP f6, bP b6" data-go="e5 c5 c3 b2 a1 e3 f2 g1" data-hit="b6"></div>
-      <figcaption>Blocked by its own pawn, captures the enemy pawn</figcaption>
-    </figure>
-  </div>
-  <div class="tip">💡 Bishops can't jump. They stop before their own pieces, or capture enemy ones.</div>
+ <div class="kick">chapter 3 · the bishop</div>
+ <h2>one color forever</h2>
+ <p>A bishop always stays on the <b>same color</b> squares. The bishop that starts on a dark square only ever visits dark squares. That's why every player gets one of each!</p>
+ <div class="figs">
+  <figure><div class="bd" data-p="wB c1 f1, bB c8 f8"></div><figcaption>One bishop for dark squares, one for light</figcaption></figure>
+  <figure><div class="bd" data-p="wB d4, wP f6, bP b6" data-go="e5 c5 c3 b2 a1 e3 f2 g1" data-hit="b6"></div><figcaption>Blocked by its own pawn, captures the enemy pawn</figcaption></figure>
+ </div>
+ <div class="tip">💡 Bishops can't jump. They stop before their own pieces, or capture enemy ones.</div>
 </section>
 
 <section>
-  <div class="kick">chapter 3 · the bishop</div>
-  <h2>quick recap</h2>
-  <ul class="ck">
-    <li>2 bishops each, worth 3 points</li>
-    <li>Moves diagonally, any number of squares</li>
-    <li>Stays on one color of square for the whole game</li>
-    <li>Can't jump over pieces</li>
-    <li>Strongest when diaonals are open</li>
-  </ul>
-  <p>Ready to try it for real?</p>
-  <a class="btn go" href="lobby.html">practice vs the bot</a>
+ <div class="kick">chapter 3 · the bishop</div>
+ <h2>quick recap</h2>
+ <ul class="ck">
+  <li>2 bishops each, worth 3 points</li>
+  <li>Moves diagonally, any number of squares</li>
+  <li>Stays on one color of square for the whole game</li>
+  <li>Can't jump over pieces</li>
+  <li>Strongest when the diagonals are open</li>
+ </ul>
+ <p>Ready to try it for real?</p>
+ <a class="btn go" href="lobby.html">practice vs the bot</a>
 </section>
 
 </div>
@@ -369,15 +367,15 @@ figcaption{font-size:13px;font-weight:800;color:#7a8b97;text-align:center;margin
   <li>Captures the first enemy piece in its path</li>
   <li>Works with the king to castle</li>
  </ul>
-<p>Ready to try it for real?</p>
-<a class="btn go" href="lobby.html">practice vs the bot</a>
-</section>
+ <p>Ready to try it for real?</p>
+ <a class="btn go" href="lobby.html">practice vs the bot</a>
 </section>
 
 </div>
 
 <!-- ============ CHAPTER 5: QUEEN ============ -->
 <div class="chapter" data-title="Chapter 5: The queen" data-icon="♛&#xFE0E;">
+
 <section class="cover">
  <div class="big">♛&#xFE0E;</div>
  <h2>the queen</h2>
@@ -386,52 +384,46 @@ figcaption{font-size:13px;font-weight:800;color:#7a8b97;text-align:center;margin
 </section>
 
 <section>
-  <div class="kick">chapter 5 · the queen</div>
-  <h2>meet the queen</h2>
-  <p>The queen is the <b>strongest piece</b>, worth <b>9 points</b>. Each player has just one.</p>
-  <p>She moves like a <b>rook and bishop combined</b>: any number of squares in a straight line or on a diagonal.</p>
-  <div class="figs">
-    <figure>
-      <div class="bd" data-p="wQ d4" data-go="d1 d2 d3 d5 d6 d7 d8 a4 b4 c4 e4 f4 g4 h4 a1 b2 c3 e5 f6 g7 a7 b6 c5 e3 f2 g1" data-anim="d4 g7"></div>
-      <figcaption>Every square the queen can reach from d4</figcaption>
-    </figure>
-    <figure>
-      <div class="b4" data-p="wQ d1, bQ d8"></div>
-      <figcaption>At the start, each queen stands on her own color</figcaption>
-    </figure>
-  </div>
+ <div class="kick">chapter 5 · the queen</div>
+ <h2>meet the queen</h2>
+ <p>The queen is the <b>strongest piece</b>, worth <b>9 points</b>. Each player has just one.</p>
+ <p>She moves like a <b>rook and a bishop combined</b>: any number of squares in a straight line or on a diagonal.</p>
+ <div class="figs">
+  <figure><div class="bd" data-p="wQ d4" data-go="d1 d2 d3 d5 d6 d7 d8 a4 b4 c4 e4 f4 g4 h4 a1 b2 c3 e5 f6 g7 h8 a7 b6 c5 e3 f2 g1" data-anim="d4 g7"></div><figcaption>Every square the queen can reach from d4</figcaption></figure>
+  <figure><div class="bd" data-p="wQ d1, bQ d8"></div><figcaption>At the start, each queen stands on her own color</figcaption></figure>
+ </div>
 </section>
 
 <section>
-  <div class="kick">chapter 5 · the queen</div>
-  <h2>power, with care</h2>
-  <p>The queen can capture along any of her lines, but she can't jump over pieces.</p>
-  <div class="figs">
-    <figure style="max-width:250px">
-      <div class="bd" data-p="wQ d4, bP d7, bN f6, bP a4" data-go="d5 d6 e5 c4 b4" data-hit="d7 f6 a4"></div>
-      <figcaption>The queen can capture any of these</figcaption>
-    </figure>
-  </div>
-  <div class="tip">💡 Losing your queen early is a big problem. Bring out knights and bishops first, and keep your queen protected.</div>
+ <div class="kick">chapter 5 · the queen</div>
+ <h2>power, with care</h2>
+ <p>The queen can capture along any of her lines, but she can't jump over pieces.</p>
+ <div class="figs"><figure style="max-width:250px">
+  <div class="bd" data-p="wQ d4, bP d7, bN f6, bP a4" data-go="d5 d6 e5 c4 b4" data-hit="d7 f6 a4"></div>
+  <figcaption>The queen can capture any of these</figcaption>
+ </figure></div>
+ <div class="tip">💡 Losing your queen early is a big problem. Bring out knights and bishops first, and keep your queen protected.</div>
 </section>
 
 <section>
-  <div class="kick">chapter 5 · the queen</div>
-  <h2>quick recap</h2>
-  <ul class="ck">
-    <li>One queen each, worth 9 points</li>
-    <li>Can't jump over pieces</li>
-    <li>The most powerful piece, so protect her</li>
-    <li>Starts on the square of her own color.</li>
-  </ul>
-  <p>Ready to try it for real?</p>
-<a class="btn go" href="lobby.html">practice vs the bot</a>
+ <div class="kick">chapter 5 · the queen</div>
+ <h2>quick recap</h2>
+ <ul class="ck">
+  <li>One queen each, worth 9 points</li>
+  <li>Moves like a rook and a bishop together</li>
+  <li>Can't jump over pieces</li>
+  <li>The most powerful piece, so protect her</li>
+  <li>Starts on the square of her own color</li>
+ </ul>
+ <p>Ready to try it for real?</p>
+ <a class="btn go" href="lobby.html">practice vs the bot</a>
 </section>
 
 </div>
 
 <!-- ============ CHAPTER 6: KING ============ -->
 <div class="chapter" data-title="Chapter 6: The king" data-icon="♚&#xFE0E;">
+
 <section class="cover">
  <div class="big">♚&#xFE0E;</div>
  <h2>the king</h2>
@@ -440,89 +432,78 @@ figcaption{font-size:13px;font-weight:800;color:#7a8b97;text-align:center;margin
 </section>
 
 <section>
-  <div class="kick">chapter 6 · the king</div>
-  <h2>meet the king</h2>
-  <p>The king is the <b>most important piece</b>. If your king is trapped, you lose the game!</p>
-  <p>He moves <b>one square in any direction</b>.</p>
-  <div class ="figs">
-    <figure style="max-width:250px;">
-      <div class ="bd" data-p="wK e4" data-go="d3 d4 d5 e3 e5 f3 f4 f5" data-anim="e4 e5"></div>
-      <figcaption>All 8 squares around the king</figcaption>
-    </figure>
-  </div>
-  <div class="tip">💡 A king can never move to a square where an enemy piece could capture him.</div>
+ <div class="kick">chapter 6 · the king</div>
+ <h2>meet the king</h2>
+ <p>The king is the <b>most important piece</b>. If your king is trapped, you lose the game!</p>
+ <p>He moves <b>one square in any direction</b>.</p>
+ <div class="figs"><figure style="max-width:250px">
+  <div class="bd" data-p="wK e4" data-go="d3 d4 d5 e3 e5 f3 f4 f5" data-anim="e4 e5"></div>
+  <figcaption>All 8 squares around the king</figcaption>
+ </figure></div>
+ <div class="tip">💡 A king can never move to a square where an enemy piece could capture him.</div>
 </section>
 
 <section>
-  <div class="kick">chapter 6 · the king</div>
-  <h2>check!</h2>
-  <p>When a king is under attack, it's called <b>check</b>. You must fix it right away!</p>
-  <ul class="ck">
-    <li>Move the king to a safe square</li>
-    <li>Block the attack with another piece</li>
-    <li>Capture the attacking piece</li>
-  </ul>
-  <div class="figs">
-    <figure style="max-width: 250px">
-      <div class="bd" data-p="wK e1, bR e8" data-go="d1 d2 f1 f2" data-hit="e1"></div>
-      <figcaption>The rook gives check. The king steps out of its line</figcaption>
-    </figure>
-  </div>
+ <div class="kick">chapter 6 · the king</div>
+ <h2>check!</h2>
+ <p>When a king is under attack, it's called <b>check</b>. You must fix it right away!</p>
+ <ul class="ck">
+  <li>Move the king to a safe square</li>
+  <li>Block the attack with another piece</li>
+  <li>Capture the attacking piece</li>
+ </ul>
+ <div class="figs"><figure style="max-width:250px">
+  <div class="bd" data-p="wK e1, bR e8" data-go="d1 d2 f1 f2" data-hit="e1"></div>
+  <figcaption>The rook gives check. The king steps out of its line</figcaption>
+ </figure></div>
 </section>
 
 <section>
-  <div class="kick">chapter 6 · the king</div>
-  <h2>checkmate!</h2>
-  <p><b>Checkmate</b> means the king is in check and has no way out. The game ends and the player who delivered it wins!🎉</p>
-  <div class="figs">
-    <figure style="max-width:250px">
-      <div class="bd" data-p="wR a8, bK g8, bP f7 g7 h7, wK e1" data-hit="g8"></div>
-      <div class="tip">💡 If a player has nno legal move but is <b>not</b> in check, it's a draw called stalemate.</div>
-    </figure>
-  </div>
+ <div class="kick">chapter 6 · the king</div>
+ <h2>checkmate!</h2>
+ <p><b>Checkmate</b> means the king is in check and has no way out. The game ends and the player who delivered it wins! 🎉</p>
+ <div class="figs"><figure style="max-width:250px">
+  <div class="bd" data-p="wR a8, bK g8, bP f7 g7 h7, wK e1" data-hit="g8"></div>
+  <figcaption>The black king is trapped by his own pawns. Checkmate!</figcaption>
+ </figure></div>
+ <div class="tip">💡 If a player has no legal move but is <b>not</b> in check, it's a draw called stalemate.</div>
 </section>
 
 <section>
-  <div class="kick">chapter 6 · the king</div>
-  <h2>castling</h2>
-  <p>Castling is a special move that tucks your king away safely and wakes up a rookk. The king slides <b>two squares</b> toward a rook, and the rook hops over to the other side.</p>
-  <div class="figs">
-    <figure>
-      <div class="bd" data-p="wK e1, wR h1" data-go="g1" data-anim="e1 g1"></div>
-      <figcaption>Before</figcaption>
-    </figure>
-    <figure>
-      <div class="bd" data-p="wK g1, wR f1"></div>
-      <figcaption>After</figcaption>
-    </figure>
-  </div>
-  <div class="tip">💡 You can only castle if the king and that rook hasn't moved yet, nothing is between them, and the king isn't in check or passing through an attacked square. In amin's chess, just tap your king pick the castling square!</div>
+ <div class="kick">chapter 6 · the king</div>
+ <h2>castling</h2>
+ <p>Castling is a special move that tucks your king away safely and wakes up a rook. The king slides <b>two squares</b> toward a rook, and the rook hops over to the other side.</p>
+ <div class="figs">
+  <figure><div class="bd" data-p="wK e1, wR h1" data-go="g1" data-anim="e1 g1"></div><figcaption>Before</figcaption></figure>
+  <figure><div class="bd" data-p="wK g1, wR f1"></div><figcaption>After</figcaption></figure>
+ </div>
+ <div class="tip">💡 You can only castle if the king and that rook haven't moved yet, nothing is between them, and the king isn't in check or passing through an attacked square. In amin's chess, just tap your king and pick the castling square!</div>
 </section>
 
 <section>
-  <div class="kick">chapter 6 · the king</div>
-  <h2>quick recap</h2>
-  <ul class="ck">
-    <li>The king moves one square in any direction</li>
-    <li>Lose your king and you lose the game</li>
-    <li>Check: the king is attacked, so you must respond</li>
-    <li>Checkmate: check with no escape, game over</li>
-    <li>Castlingg: a king an rook special move</li>
-  </ul>
-  <p>You know all the pieces now. Time to play!</p>
-  <a class="btn go" href="lobby.html">practice vs the bot</a>
+ <div class="kick">chapter 6 · the king</div>
+ <h2>quick recap</h2>
+ <ul class="ck">
+  <li>The king moves one square in any direction</li>
+  <li>Lose your king and you lose the game</li>
+  <li>Check: the king is attacked, so you must respond</li>
+  <li>Checkmate: check with no escape, game over</li>
+  <li>Castling: a king and rook special move</li>
+ </ul>
+ <p>You know all the pieces now. Time to play!</p>
+ <a class="btn go" href="lobby.html">practice vs the bot</a>
 </section>
+
 </div>
-
-
 
 </div><!-- end unit 1 -->
 
 <!-- ################################ UNIT 2 ################################ -->
-<div class="unit" data-title="Unit 2: the basics">
+<div class="unit" data-title="Unit 2: The basics">
 
 <!-- ============ CHAPTER 7: THE CHESSBOARD ============ -->
 <div class="chapter" data-title="Chapter 7: The chessboard" data-icon="🗺️">
+
 <section class="cover">
  <div class="big">🗺️</div>
  <h2>the chessboard</h2>
@@ -531,34 +512,27 @@ figcaption{font-size:13px;font-weight:800;color:#7a8b97;text-align:center;margin
 </section>
 
 <section>
-  <div class="kick">chapter 7 · the chessboard</div>
-  <h2>64 squares</h2>
-  <p>A chessboard is a grid of <b>64 squares</b>: 8 rows and 8 columns, in alternating light and dark colors.</p>
-  <p>If your playing with a physical board always set up the board so there's a <b>light square in the bottom-right corner</b>, for both players!</p>
-  <div class="figs">
-    <figure style="max-width:250px">
-      <div class="bd"></div>
-      <figcaption>The board from White's side. The bottom-right square is light</figcaption>
-    </figure>
-  </div>
-  <div class="tip">💡 Remember : "light on the right".</div>
+ <div class="kick">chapter 7 · the chessboard</div>
+ <h2>64 squares</h2>
+ <p>A chessboard is a grid of <b>64 squares</b>: 8 rows and 8 columns, in alternating light and dark colors.</p>
+ <p>If you're playing on a physical board, always set it up so there's a <b>light square in the bottom-right corner</b>, for both players!</p>
+ <div class="figs"><figure style="max-width:250px">
+  <div class="bd"></div>
+  <figcaption>The board from White's side. The bottom-right square is light</figcaption>
+ </figure></div>
+ <div class="tip">💡 Remember: "light on the right".</div>
 </section>
 
 <section>
-  <div class="kick">chapter 7 · the chessboard</div>
-  <h2>files and ranks</h2>
-  <p>The columns going up and down are called <b>files</b>. They have letters, <b>1 to 8</b></p>
-  <div class="figs">
-    <figure>
-      <div class="bd" data-go="e1 e2 e3 e4 e5 e6 e7 e8"></div>
-      <figcaption>The e-file (a column)</figcaption>
-    </figure>
-    <figure>
-      <div class="bd" data-go="e1 e2 e3 e4 e5 e6 e7 e8"></div>
-      <figcaption>The 4th rank (a row)</figcaption>
-    </figure>
-  </div>
-  <div class="tip">💡 Diagonals are the third kind of line. Bishops and queens love them!</div>
+ <div class="kick">chapter 7 · the chessboard</div>
+ <h2>files and ranks</h2>
+ <p>The columns going up and down are called <b>files</b>. They have letters, <b>a to h</b>.</p>
+ <p>The rows going side to side are called <b>ranks</b>. They have numbers, <b>1 to 8</b>.</p>
+ <div class="figs">
+  <figure><div class="bd" data-go="e1 e2 e3 e4 e5 e6 e7 e8"></div><figcaption>The e-file (a column)</figcaption></figure>
+  <figure><div class="bd" data-go="a4 b4 c4 d4 e4 f4 g4 h4"></div><figcaption>The 4th rank (a row)</figcaption></figure>
+ </div>
+ <div class="tip">💡 Diagonals are the third kind of line. Bishops and queens love them!</div>
 </section>
 
 <section>
@@ -573,22 +547,23 @@ figcaption{font-size:13px;font-weight:800;color:#7a8b97;text-align:center;margin
 </section>
 
 <section>
-  <div class="kick">chapter 7 · the chessboard</div>
-  <h2>quick recap</h2>
-  <ul class="ck">
-    <li>The board has 64 squares, light on the right</li>
-    <li>Files are columns, named a to h</li>
-    <li>Ranks are rows, numbered 1 to 8</li>
-    <li>A square's name is its letter plus its number</li>
-  </ul>
-  <p>Ready to try it for real?</p>
-<a class="btn go" href="lobby.html">practice vs the bot</a>
+ <div class="kick">chapter 7 · the chessboard</div>
+ <h2>quick recap</h2>
+ <ul class="ck">
+  <li>The board has 64 squares, light on the right</li>
+  <li>Files are columns, named a to h</li>
+  <li>Ranks are rows, numbered 1 to 8</li>
+  <li>A square's name is its letter plus its number</li>
+ </ul>
+ <p>Ready to try it for real?</p>
+ <a class="btn go" href="lobby.html">practice vs the bot</a>
 </section>
-</div>
+
 </div>
 
 <!-- ============ CHAPTER 8: SETTING UP ============ -->
 <div class="chapter" data-title="Chapter 8: Setting up" data-icon="🎯">
+
 <section class="cover">
  <div class="big">🎯</div>
  <h2>setting up</h2>
@@ -597,59 +572,56 @@ figcaption{font-size:13px;font-weight:800;color:#7a8b97;text-align:center;margin
 </section>
 
 <section>
-  <div class="kick">chapter 8 · setting up</div>
-  <h2>the starting position</h2>
-  <p>Pawns fill the <b>second row</b> in front of each player. Behind them, the other pieces line up in this order: rook, knight, bishop, queen, king, bishop, knight, rook</p>
-  <div class="figs">
-    <figure style="max-width: 260px">
-      <div class="bd" data-p="wR a1 h1, wN b1 g1, wB c1 f1, wQ d1, wK e1, wP a2 b2 c2 d2 e2 f2 g2 h2, bR a8 h8, bN b8 g8, bB c8 f8, bQ d8, bK e8, bP a7 b7 c7 d7 e7 f7 g7 h7"></div>
-      <figcaption>The starting position, seen from White's side</figcaption>
-    </figure>
-  </div>
+ <div class="kick">chapter 8 · setting up</div>
+ <h2>the starting position</h2>
+ <p>Pawns fill the <b>second row</b> in front of each player. Behind them, the other pieces line up in this order: rook, knight, bishop, queen, king, bishop, knight, rook.</p>
+ <div class="figs"><figure style="max-width:260px">
+  <div class="bd" data-p="wR a1 h1, wN b1 g1, wB c1 f1, wQ d1, wK e1, wP a2 b2 c2 d2 e2 f2 g2 h2, bR a8 h8, bN b8 g8, bB c8 f8, bQ d8, bK e8, bP a7 b7 c7 d7 e7 f7 g7 h7"></div>
+  <figcaption>The starting position, seen from White's side</figcaption>
+ </figure></div>
 </section>
 
 <section>
-  <div class="kick">chapter 8  · setting up</div>
-  <h2>queen on her color</h2>
-  <p>The two kings and queens always face each other across the board. The trick to not mixing them up:</p>
-  <p><b>The queen starts on a square that matches her color.</b> The white queen starts on a light square, and the black queen on a dark queen.</p>
-  <div class="figs">
-    <figure style="max-width:250px">
-      <div class="bd" data-p="wQ d1, wK e1, bQ d8, bK e8"></div>
-      <figcaption>White queen on a light square, black queen on a dark one</figcaption>
-    </figure>
-  </div>
-  <div class="tip">💡 "Queen on her color" and "light on the right" are the two checks for a correct setup.</div>
+ <div class="kick">chapter 8 · setting up</div>
+ <h2>queen on her color</h2>
+ <p>The two kings and queens always face each other across the board. The trick to not mixing them up:</p>
+ <p><b>The queen starts on a square that matches her color.</b> The white queen starts on a light square, and the black queen on a dark square.</p>
+ <div class="figs"><figure style="max-width:250px">
+  <div class="bd" data-p="wQ d1, wK e1, bQ d8, bK e8"></div>
+  <figcaption>White queen on a light square, black queen on a dark one</figcaption>
+ </figure></div>
+ <div class="tip">💡 "Queen on her color" and "light on the right" are the two checks for a correct setup.</div>
 </section>
 
 <section>
-  <div class="kick">chapter 8 · setting up</div>
-  <h2>white goes first</h2>
-  <p><b>White always moves first</b>. After that, the players take turns one each move.</p>
-  <p>You can't skip a turn, and you can't move two pieces at one (except in castling).</p>
-  <div class="figs">
-    <figure style="max-width:250px">
-      <div class="bd" data-p="wP e2" data-go="e3 e4" data-anim="e2 e4"></div>
-      <figcaption>A popular first move: pawn to e4</figcaption>
-    </figure>
-  </div>
-  <div class="tip">💡 In amin's chess online games, you given a color automatically. A rematch swaps colors!</div>
+ <div class="kick">chapter 8 · setting up</div>
+ <h2>white goes first</h2>
+ <p><b>White always moves first</b>. After that, the players take turns, one move each.</p>
+ <p>You can't skip a turn, and you can't move two pieces at once (except when castling).</p>
+ <div class="figs"><figure style="max-width:250px">
+  <div class="bd" data-p="wP e2" data-go="e3 e4" data-anim="e2 e4"></div>
+  <figcaption>A popular first move: pawn to e4</figcaption>
+ </figure></div>
+ <div class="tip">💡 In amin's chess online games, you're given a color automatically. A rematch swaps colors!</div>
 </section>
 
 <section>
-  <div class="kick">chapter 8 · setting up</div>
-  <h2>quick recap</h2> 
-  <ul class="ck">
-    <li>Pawns go on the second row, the other pieces behind them</li>
-    <li>Back row: rook, knight, bishop, queen, king, bishop, knight, rook</li>
-    <li>Queen on her color</li>
-    <li>White moves first, then players take turns</li>
-  </ul>
-   <p>Ready to try it for real?</p>
-<a class="btn go" href="lobby.html">practice vs the bot</a>
+ <div class="kick">chapter 8 · setting up</div>
+ <h2>quick recap</h2>
+ <ul class="ck">
+  <li>Pawns go on the second row, the other pieces behind them</li>
+  <li>Back row: rook, knight, bishop, queen, king, bishop, knight, rook</li>
+  <li>Queen on her color</li>
+  <li>White moves first, then players take turns</li>
+ </ul>
+ <p>Ready to try it for real?</p>
+ <a class="btn go" href="lobby.html">practice vs the bot</a>
 </section>
+
 </div>
-</div>
+
+<!-- ############ PASTE MORE UNIT 2 CHAPTERS HERE (chapters 9 to 12) ############ -->
+
 </div><!-- end unit 2 -->
 
 </div><!-- end library -->
@@ -683,7 +655,7 @@ function drawBoards(root){
  });
 }
 
-
+/* ---- the book ---- */
 const book=$('book');
 book.insertAdjacentHTML('beforeend','<div class="rings"></div>');
 let leaves=[],N=0,cur=0,busy=false;
@@ -721,7 +693,7 @@ let sx=null;
 book.addEventListener('pointerdown',e=>{sx=e.clientX});
 book.addEventListener('pointerup',e=>{if(sx===null)return;const dx=e.clientX-sx;sx=null;if(dx<-60)go(1);else if(dx>60)go(-1)});
 
-
+/* ---- build the left menu from the library ---- */
 let firstBtn=null,firstChapter=null;
 document.querySelectorAll('#library > .unit').forEach((u,n)=>{
  const d=document.createElement('div');d.className='unit'+(n===0?' open':'');
