@@ -241,40 +241,45 @@ const scoreMoves=(st,d)=>legal(st).map(m=>({m,s:-ab(make(st,m),d-1,-1e9,1e9)}));
 
 /* ---------- coach ---------- */
 let moveNo=0;
+const up=s=>s[0].toUpperCase()+s.slice(1);
 function desc(m,aft){let s;
- if(m.ca)s='castled, tucking your king away safely';
- else{s=`moved your ${nm(m.p)} from ${sqn(m.f)} to ${sqn(m.to)}`;if(m.cap)s=`took the ${nm(m.cap)} on ${sqn(m.to)} with your ${nm(m.p)}`;if(m.pr)s+=' and promoted to a queen'}
- if(!legal(aft).length&&inCheck(aft))s+=' — checkmate!';else if(inCheck(aft))s+=' and gave check';return s}
+ if(m.ca)s='castled';
+ else if(m.cap)s=`took the ${nm(m.cap)} on ${sqn(m.to)}`;
+ else s=`${nm(m.p)} to ${sqn(m.to)}`;
+ if(m.pr)s+=' and made a queen';
+ if(!legal(aft).length&&inCheck(aft))s+=', checkmate';else if(inCheck(aft))s+=', check';return s}
 function coach(bef,m,aft){
  moveNo++;
  const all=scoreMoves(bef,2).sort((a,b)=>b.s-a.s),same=(x,y)=>x.f===y.f&&x.to===y.to;
  const mv=all.find(x=>same(x.m,m)),bt=all[0],loss=bt.s-mv.s,best=same(bt.m,m);
  let g,cl;
- if(best||loss<=15){g=best?'Best move! ⭐':'Great move!';cl='good'}
+ if(best||loss<=15){g=best?'Best move':'Great move';cl='good'}
  else if(loss<=50){g='Good move';cl='ok'}
- else if(loss<=120){g='Inaccuracy';cl='meh'}
+ else if(loss<=120){g='Small slip';cl='meh'}
  else if(loss<=300){g='Mistake';cl='bad'}
- else{g='Blunder 😬';cl='blun'}
- const k=m.p.toLowerCase(),tips=[];
- if(k==='p'&&[3,4].includes(m.to>>3)&&[3,4].includes(m.to&7))tips.push('Pawns in the center give your pieces more room.');
- if((k==='n'||k==='b')&&(m.f>>3)===(myC==='w'?7:0)&&!m.cap)tips.push('Developing a piece early is a great habit.');
- if(k==='q'&&moveNo<5&&!m.cap)tips.push('Bringing the queen out this early lets your opponent chase it with tempo.');
+ else{g='Blunder';cl='blun'}
+ const k=m.p.toLowerCase();let tip='';
+ if(loss<=50){
+  if(k==='p'&&[3,4].includes(m.to>>3)&&[3,4].includes(m.to&7))tip='Center pawns give your pieces room.';
+  else if((k==='n'||k==='b')&&(m.f>>3)===(myC==='w'?7:0)&&!m.cap)tip='Good, get your pieces out early.';
+  else if(k==='q'&&moveNo<5&&!m.cap)tip='Careful, early queens get chased.';
+ }
  let fix='';
  if(loss>15&&!best){
   const bm=bt.m,ba=make(bef,bm);let why;
-  if(bt.s>5e4)why='it forces checkmate!';
-  else if(bm.cap)why=`it wins the ${nm(bm.cap)}.`;
-  else if(bm.ca)why='it gets your king safe.';
-  else if(inCheck(ba))why='it puts the king under pressure.';
-  else why=`it would have kept you about ${(loss/100).toFixed(1)} pawns better off.`;
-  fix=`<div class="fix">💡 ${loss>50?'A stronger move was':'Slightly more accurate was'} <b style="display:inline">${desc(bm,ba).replace(/ and gave check| — checkmate!/,'')}</b> — ${why}</div>`;
+  if(bt.s>5e4)why='Forces mate.';
+  else if(bm.cap)why=`Wins the ${nm(bm.cap)}.`;
+  else if(bm.ca)why='Gets your king safe.';
+  else if(inCheck(ba))why='Puts the king under pressure.';
+  else why=`About ${(loss/100).toFixed(1)} pawns better.`;
+  fix=`<div class="fix">${loss>50?'Better':'Slightly better'}: <b style="display:inline">${desc(bm,ba)}</b>. ${why}</div>`;
  }
  let extra='';
  if(loss>50){const rp=scoreMoves(aft,2).sort((a,b)=>b.s-a.s)[0];
-  if(rp){if(rp.m.cap)extra=`<p>⚠️ This let your opponent capture your ${nm(rp.m.cap)} on ${sqn(rp.m.to)}.</p>`;
-   else if(rp.s>5e4)extra='<p>⚠️ This walks into a forced checkmate!</p>'}}
+  if(rp){if(rp.m.cap)extra=`<p>They can take your ${nm(rp.m.cap)} on ${sqn(rp.m.to)}.</p>`;
+   else if(rp.s>5e4)extra='<p>That walks into mate.</p>'}}
  const el=document.createElement('div');el.className='card '+cl;
- el.innerHTML=`<b>${g}</b><p>You ${desc(m,aft)}.</p>${tips.length&&loss<=50?'<p>'+tips[0]+'</p>':''}${extra}${fix}`;
+ el.innerHTML=`<b>${g}</b><p>${up(desc(m,aft))}.</p>${tip?'<p>'+tip+'</p>':''}${extra}${fix}`;
  feed.insertBefore(el,feed.firstChild);lastCard=el}
 
 /* ---------- 3D board + game flow ---------- */
@@ -331,19 +336,19 @@ function render(){
 function refresh(){
  legalNow=legal(st);const ck=inCheck(st);chk=ck?st.b.indexOf(st.t==='w'?'K':'k'):-1;
  let t;
- if(gone)t='Your opponent left the game';
+ if(gone)t='Your opponent left';
  else if(!legalNow.length){
-  if(ck)t=st.t!==myC?'Checkmate — you win! 🎉':(mode==='bot'?'Checkmate — the bot wins':'Checkmate — you lose');
-  else t='Stalemate — it\'s a draw'}
- else t=(st.t===myC?'Your move':(mode==='bot'?'Bot is thinking…':'Opponent\'s move…'))+(ck?' — check!':'');
+  if(ck)t=st.t!==myC?'Checkmate, you win!':(mode==='bot'?'Checkmate, the bot wins':'Checkmate, you lose');
+  else t='Stalemate, it\'s a draw'}
+ else t=(st.t===myC?'Your move':(mode==='bot'?'Bot is thinking':'Their move'))+(ck?', check!':'');
  $('status').textContent=t;
- const e=ev(st.b)/100*(myC==='w'?1:-1),oname=mode==='bot'?'Bot':'Opponent';
- $('evalb').textContent=Math.abs(e)<.3?'Position: about even':e>0?`You're ahead by ${e.toFixed(1)}`:`${oname} is ahead by ${(-e).toFixed(1)}`;
+ const e=ev(st.b)/100*(myC==='w'?1:-1);
+ $('evalb').textContent=Math.abs(e)<.3?'Even game':e>0?`You're up ${e.toFixed(1)}`:`${mode==='bot'?'Bot is':"They're"} up ${(-e).toFixed(1)}`;
  render();turnBars();checkEnd()}
 function note(m,who){
  if(!lastCard)return;
  const d=document.createElement('div');d.className='bot';
- d.textContent=`${who} replied: ${nm(m.p)} ${sqn(m.f)} → ${sqn(m.to)}${m.cap?' (captured your '+nm(m.cap)+')':''}`;lastCard.appendChild(d)}
+ d.textContent=`${who}: ${nm(m.p)} to ${sqn(m.to)}${m.cap?', took your '+nm(m.cap):''}`;lastCard.appendChild(d)}
 function botMove(){
  const l=+lvl.value,s=scoreMoves(st,l).sort((a,b)=>b.s-a.s),pool=s.filter(x=>x.s>=s[0].s-(l===1?80:l===2?15:5)),m=pool[Math.random()*pool.length|0].m;
  st=make(st,m);last=[m.f,m.to];refresh();animateMove(m);note(m,'Bot')}
@@ -365,8 +370,8 @@ function reset(c){
  myC=c;st=init();sel=null;tg=new Set();last=[];busy=false;moveNo=0;lastCard=null;gone=false;feed.innerHTML='';
  const net=mode==='net',el=document.createElement('div');el.className='card info';
  el.innerHTML=net
-  ?`<b>You're playing ${c==='w'?'white':'black'} 🎮</b><p>${c==='w'?'You move first.':'White moves first — hang tight.'} Tap a piece, then where to move it. After each of your moves I'll grade it and tell you how you could have done better.</p>`
-  :'<b>Welcome! 👋</b><p>You are white — tap a piece, then tap where to move it. After every move I\'ll grade it and tell you how you could have done better.</p><p>Move your mouse to tilt the board, or click and drag to spin it. Tap "flat board" for a top-down view.</p>';
+  ?`<b>You're ${c==='w'?'white':'black'}</b><p>${c==='w'?'You go first.':'White goes first.'} Tap a piece, then where to move it. I'll rate each move you make.</p>`
+  :'<b>Let\'s play</b><p>You\'re white. Tap a piece, then where to move it. I\'ll rate each move you make.</p><p>Drag the board to spin it.</p>';
  feed.appendChild(el);
  lvl.hidden=net;$('new').textContent=net?'rematch':'new game';refresh();setBars()}
 
