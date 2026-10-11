@@ -466,12 +466,12 @@ async function loadProfile(){
  const bar=$('authbar');
  if(!sb){bar.innerHTML='<span class="ab">accounts not set up yet</span>';return}
  if(!user){me=null;
-  bar.innerHTML='<div class="nav"><a class="btn" href="guidebook.html">guidebook</a><a class="btn go" href="lobby.html">play</a></div><button class="btn" id="abIn">log in</button><button class="btn go" id="abUp">sign up</button>';
+  bar.innerHTML='<div class="nav"><a class="btn" href="guidebook.html">guidebook</a></div><button class="btn" id="abIn">log in</button><button class="btn go" id="abUp">sign up</button>';
   $('abIn').onclick=()=>openAuth('in');$('abUp').onclick=()=>openAuth('up');return}
  const{data}=await sb.from('profiles').select('username,wins,losses,draws,avatar_url').eq('id',user.id).single();
  const p=data||{username:'player',wins:0,losses:0,draws:0,avatar_url:null};
  me={id:user.id,...p};
- bar.innerHTML=`<a class="ab" href="profile.html" style="text-decoration:none;color:inherit"><span id="abAv"></span><b></b> · ${p.wins}W ${p.losses}L ${p.draws}D</a><button class="btn" id="abOut">log out</button>`;
+ bar.innerHTML=`<div class="nav"><a class="btn" href="guidebook.html">guidebook</a></div><a class="ab" href="profile.html" style="text-decoration:none;color:inherit"><span id="abAv"></span><b></b> · ${p.wins}W ${p.losses}L ${p.draws}D</a><button class="btn" id="abOut">log out</button>`;
  $('abAv').replaceWith(avatarNode(p.avatar_url,p.username,'mm'));
  bar.querySelector('b').textContent=p.username;
  $('abOut').onclick=()=>sb.auth.signOut();
