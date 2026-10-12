@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>amin's chess – puzzle rush</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--main:#3fb8f5;--main-d:#1d96d4;--ink:#3c3c3c;--line:#e5e5e5;--light:#f5faff;--dark:#5ec0f2;--base:#1f6fa3;--red:#ff4b4b;--s:clamp(34px,min(10.5vw,8vh),72px)}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;min-height:100vh;font-family:'Nunito','Trebuchet MS',system-ui,sans-serif;color:var(--ink);
+ background:conic-gradient(#d9effc 25%,#f0f9ff 0 50%,#d9effc 0 75%,#f0f9ff 0) 0 0/90px 90px;animation:mv 14s linear infinite}
+@keyframes mv{to{background-position:180px 90px}}
+.top{position:fixed;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:12px 20px;z-index:20}
+.logo{font-weight:900;font-size:28px;color:var(--main);text-decoration:none}
+.nav{display:flex;gap:8px}
+.btn{font:800 14px/1 'Nunito',sans-serif;letter-spacing:.8px;text-transform:uppercase;border-radius:14px;padding:13px 20px;cursor:pointer;
+ border:2px solid var(--line);border-bottom-width:4px;background:#fff;color:var(--main-d);text-decoration:none;display:inline-block}
+.btn:active{transform:translateY(2px);border-bottom-width:2px}
+.btn.go{background:var(--main);color:#fff;border:0;border-bottom:4px solid var(--main-d)}
+.btn.big{padding:17px 40px;font-size:16px}
+.screen{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:76px 16px 24px;text-align:center}
+.card{background:#fff;border:2px solid var(--line);border-bottom-width:6px;border-radius:26px;padding:28px 26px;width:min(94vw,440px);display:flex;flex-direction:column;gap:12px;align-items:center}
+h1{margin:0;font-size:clamp(34px,7vw,50px);font-weight:900;color:var(--main-d);line-height:1.05}
+.sub{margin:0;font-weight:700;font-size:16.5px;line-height:1.45;color:#777}
+ul.ck{list-style:none;padding:0;margin:4px 0;width:100%;text-align:left}
+ul.ck li{padding:9px 0 9px 36px;position:relative;font-weight:800;font-size:15.5px;border-bottom:2px solid #eef5fa}
+ul.ck li::before{content:'✓';position:absolute;left:0;top:7px;width:24px;height:24px;border-radius:50%;background:var(--main);color:#fff;text-align:center;line-height:24px;font-size:14px}
+.best{font-weight:800;color:var(--main-d);background:#e8f6fe;border-radius:99px;padding:6px 14px;font-size:14px}
+.bignum{font-size:76px;font-weight:900;line-height:1;color:var(--main)}
+.newbest{background:#fff8e0;border:2px solid #ffe08a;border-radius:14px;padding:8px 14px;font-weight:900}
+
+/* run screen */
+.hud{width:calc(var(--s)*8 + 6px);display:flex;align-items:center;justify-content:space-between;gap:10px}
+.tbox{font-size:36px;font-weight:900;line-height:1;min-width:92px;text-align:left}
+.tbox.low{color:var(--red);animation:pulse .5s infinite alternate}
+@keyframes pulse{to{transform:scale(1.08)}}
+.hearts{display:flex;gap:3px;font-size:26px;line-height:1}
+.hearts span{color:var(--red);transition:color .2s}
+.hearts span.lost{color:#d9dee3}
+.hearts span.hit{animation:shake .4s}
+@keyframes shake{25%{transform:translateX(-4px) rotate(-10deg)}75%{transform:translateX(4px) rotate(10deg)}}
+.sbox{text-align:right;line-height:1.05}
+.sbox b{display:block;font-size:30px;font-weight:900;color:var(--main-d)}
+.sbox small{font-size:12px;font-weight:800;color:#7a8b97}
+.bar{width:calc(var(--s)*8 + 6px);height:12px;background:#fff;border:2px solid var(--line);border-radius:99px;overflow:hidden}
+#fill{height:100%;width:100%;background:var(--main);border-radius:99px}
+.board{width:calc(var(--s)*8 + 6px);height:calc(var(--s)*8 + 6px);display:grid;grid-template-columns:repeat(8,1fr);grid-template-rows:repeat(8,1fr);border:3px solid var(--base);border-radius:12px;overflow:hidden;touch-action:manipulation;user-select:none}
+.sq{position:relative;cursor:pointer}
+.sq.l{background:var(--light)}.sq.d{background:var(--dark)}
+.sq.last{box-shadow:inset 0 0 0 100px rgba(255,214,0,.38)}
+.sq.sel{box-shadow:inset 0 0 0 4px #ffc800,inset 0 0 0 100px rgba(255,214,0,.3)}
+.sq.good{box-shadow:inset 0 0 0 100px rgba(63,184,245,.55)}
+.sq.bad{box-shadow:inset 0 0 0 100px rgba(255,75,75,.6)}
+.sq.rev{box-shadow:inset 0 0 0 4px #1d96d4,inset 0 0 0 100px rgba(63,184,245,.4)}
+.sq.hint::after{content:'';position:absolute;inset:33%;border-radius:50%;background:rgba(0,0,0,.3)}
+.sq.hint.cap::after{inset:6%;background:none;border:4px solid rgba(255,60,60,.8)}
+.sq i{position:absolute;font-style:normal;font-weight:900;line-height:1;font-size:max(9px,calc(var(--s)*.22))}
+.sq i.rk{top:calc(var(--s)*.05);left:calc(var(--s)*.07)}
+.sq i.fl{bottom:calc(var(--s)*.05);right:calc(var(--s)*.07)}
+.sq.l i{color:var(--dark)}.sq.d i{color:var(--light)}
+.p{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:calc(var(--s)*.84);line-height:1;z-index:3;pointer-events:none}
+.p.w{color:#fff;text-shadow:-1px 0 #2d2d2d,1px 0 #2d2d2d,0 -1px #2d2d2d,0 1px #2d2d2d}
+.p.b{color:#2b2b2b;text-shadow:0 0 1px #fff}
+.prompt{font-weight:900;font-size:20px}
+.lvl{font-size:13px;font-weight:800;color:#7a8b97}
+.fb{min-height:30px;font-weight:900;font-size:20px}
+.fb.good{color:var(--main-d)}.fb.bad{color:var(--red)}
+</style>
+</head>
+<body>
+
+<div class="top">
+ <a class="logo" href="index.html">amin's chess</a>
+ <div class="nav"><a class="btn" href="guidebook.html">guidebook</a><a class="btn go" href="lobby.html">play</a></div>
+</div>
+
+<!-- start -->
+<main class="screen" id="start">
+ <div class="card">
+  <h1>puzzle rush</h1>
+  <p class="sub">Solve as many puzzles as you can before the clock runs out.</p>
+  <ul class="ck">
+   <li>3 minutes on the clock</li>
+   <li>5 lives, a wrong move costs one</li>
+   <li>Puzzles get harder as you go</li>
+   <li>Easy puzzles score 10, hard ones up to 30</li>
+  </ul>
+  <div class="best" id="bestS"></div>
+  <button class="btn go big" id="go">start</button>
+ </div>
+</main>
+
+<!-- run -->
+<main class="screen" id="play" hidden>
+ <div class="hud">
+  <div class="tbox" id="time">3:00</div>
+  <div class="hearts" id="hearts"></div>
+  <div class="sbox"><b id="score">0</b><small id="solvedS">0 solved</small></div>
+ </div>
+ <div class="bar"><div id="fill"></div></div>
+ <div class="board" id="board"></div>
+ <div class="prompt" id="prompt"></div>
+ <div class="lvl" id="lvl"></div>
+ <div class="fb" id="fb"></div>
+</main>
+
+<!-- results -->
+<main class="screen" id="end" hidden>
+ <div class="card">
+  <div class="sub" id="why"></div>
+  <div class="bignum" id="fscore">0</div>
+  <div class="sub">points</div>
+  <p class="sub"><b id="fsolved">0</b> puzzles solved</p>
+  <div class="newbest" id="nb" hidden>New personal best!</div>
+  <div class="best" id="bestE"></div>
+  <button class="btn go big" id="again">play again</button>
+  <a class="btn" href="lobby.html">back to the lobby</a>
+ </div>
+</main>
+
+<canvas id="confetti" style="position:fixed;inset:0;pointer-events:none;z-index:70"></canvas>
+
+<script>
+/* =====================================================================
+   REMINDER TO SELF: PUZZLES
+   Each puzzle is [level, "FEN", "moves"]
+     level  1 (easiest) to 5 (hardest)
+     FEN    the position, with the player to move
+     moves  the winning line in coordinates, player move first, then the
+            opponent's reply, then the player's next move, and so on
+   Every puzzle here is a forced checkmate. Put morepuzzles into the
+   list below, one per line, each ending in a comma.
+   ===================================================================== */
+const RAW=[
+  [1,"r1bqkb1r/pppp1ppp/2n2n2/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR w - - 0 1","h5f7"],
+  [1,"3r2k1/5ppp/8/8/8/8/5PPP/6K1 b - - 0 1","d8d1"],
+  [2,"6rk/6pp/8/4N3/8/8/8/6K1 w - - 0 1","e5f7"],
+  [3,"7k/8/8/8/8/8/1R6/R5K1 w - - 0 1","b2b7 h8g8 a1a8"],
+  [4,"r5k1/5ppp/8/8/8/8/1Q3PPP/1R4K1 w - - 0 1","b2b8 a8b8 b1b8"],
+  
+];
+
+/* ---------- game settings ---------- */
+const DURATION=180,LIVES=5,PER_LEVEL=3;   // seconds, lives, solved puzzles needed per level
+const POINTS=lv=>10+(lv-1)*5;
+
+/* ---------- chess rules ---------- */
+const G={p:'♟',n:'♞',b:'♝',r:'♜',q:'♛',k:'♚'};
+const KN=[[1,2],[2,1],[-1,2],[-2,1],[1,-2],[2,-1],[-1,-2],[-2,-1]];
+const KG=[[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]];
+const isW=p=>p<'a',$=id=>document.getElementById(id);
+const sqi=s=>(8-+s[1])*8+'abcdefgh'.indexOf(s[0]);
+function fromFen(fen){const[pl,side,cas,ep]=fen.split(' ');const b=[];
+ pl.split('/').forEach(row=>{for(const ch of row){if(+ch)for(let i=0;i<+ch;i++)b.push('');else b.push(ch)}});
+ return{b,t:side,c:cas==='-'?'':cas,ep:ep&&ep!=='-'?sqi(ep):-1}}
+function att(b,s,w){
+ const r=s>>3,f=s&7,at=(R,F,c)=>R>=0&&R<8&&F>=0&&F<8&&b[R*8+F]===c;
+ const pr=w?r+1:r-1,P=w?'P':'p',N=w?'N':'n',K=w?'K':'k',B=w?'B':'b',Rk=w?'R':'r',Q=w?'Q':'q';
+ if(at(pr,f-1,P)||at(pr,f+1,P))return true;
+ for(const[d,e]of KN)if(at(r+d,f+e,N))return true;
+ for(const[d,e]of KG){if(at(r+d,f+e,K))return true;
+  let R=r+d,F=f+e;const dg=d&&e;
+  while(R>=0&&R<8&&F>=0&&F<8){const p=b[R*8+F];if(p){if(p===Q||p===(dg?B:Rk))return true;break}R+=d;F+=e}}
+ return false}
+function pseudo(st){
+ const{b,t,c,ep}=st,w=t==='w',out=[];
+ const add=(f,to,x)=>out.push({f,to,p:b[f],cap:b[to],...x});
+ for(let s=0;s<64;s++){const p=b[s];if(!p||isW(p)!==w)continue;
+  const r=s>>3,f=s&7,k=p.toLowerCase();
+  if(k==='p'){const d=w?-1:1,r1=r+d,pr=r1===(w?0:7)?'q':0;
+   if(r1<0||r1>7)continue;
+   if(!b[r1*8+f]){add(s,r1*8+f,{pr});if(r===(w?6:1)&&!b[(r+2*d)*8+f])add(s,(r+2*d)*8+f,{dbl:1})}
+   for(const e of[-1,1]){const F=f+e;if(F<0||F>7)continue;const to=r1*8+F,x=b[to];
+    if(x&&isW(x)!==w)add(s,to,{pr});else if(to===ep)add(s,to,{epc:1,cap:w?'p':'P'})}
+  }else if(k==='n'||k==='k'){
+   for(const[d,e]of(k==='n'?KN:KG)){const R=r+d,F=f+e;if(R<0||R>7||F<0||F>7)continue;const x=b[R*8+F];if(!x||isW(x)!==w)add(s,R*8+F)}
+   if(k==='k'&&s===(w?60:4)&&!att(b,s,!w)){
+    if(c.includes(w?'K':'k')&&!b[s+1]&&!b[s+2]&&!att(b,s+1,!w)&&!att(b,s+2,!w))add(s,s+2,{ca:1});
+    if(c.includes(w?'Q':'q')&&!b[s-1]&&!b[s-2]&&!b[s-3]&&!att(b,s-1,!w)&&!att(b,s-2,!w))add(s,s-2,{ca:-1})}
+  }else{for(const[d,e]of KG){if(k==='b'&&!(d&&e))continue;if(k==='r'&&d&&e)continue;
+   let R=r+d,F=f+e;while(R>=0&&R<8&&F>=0&&F<8){const x=b[R*8+F];if(!x||isW(x)!==w)add(s,R*8+F);if(x)break;R+=d;F+=e}}}
+ }return out}
+function make(st,m){
+ const b=st.b.slice(),w=st.t==='w';
+ b[m.to]=m.pr?(w?'Q':'q'):m.p;b[m.f]='';
+ if(m.epc)b[m.to+(w?8:-8)]='';
+ if(m.ca){if(m.ca>0){b[m.f+1]=b[m.f+3];b[m.f+3]=''}else{b[m.f-1]=b[m.f-4];b[m.f-4]=''}}
+ let c=st.c;for(const q of[m.f,m.to]){if(q===60)c=c.replace(/[KQ]/g,'');if(q===4)c=c.replace(/[kq]/g,'');
+  if(q===63)c=c.replace('K','');if(q===56)c=c.replace('Q','');if(q===7)c=c.replace('k','');if(q===0)c=c.replace('q','')}
+ return{b,t:w?'b':'w',c,ep:m.dbl?(m.f+m.to)/2:-1}}
+function inCheck(st){const w=st.t==='w';return att(st.b,st.b.indexOf(w?'K':'k'),!w)}
+function legal(st){const w=st.t==='w',k=w?'K':'k';return pseudo(st).filter(m=>{const n=make(st,m);return!att(n.b,n.b.indexOf(k),!w)})}
+function mate1(s){for(const m of legal(s)){const t=make(s,m);if(inCheck(t)&&!legal(t).length)return true}return false}
+
+/* ---------- judging a move ---------- */
+/* s: position, m: the move tried, k: player moves left to mate, ex: the stored move, div: left the stored line */
+function judge(s,m,k,ex,div){
+ const t=make(s,m),rep=legal(t);
+ const mate=!rep.length&&inCheck(t);
+ const same=!div&&!!ex&&m.f===ex.f&&m.to===ex.to;
+ let ok=same||mate;
+ if(!ok&&k===2&&rep.length)ok=rep.every(r=>mate1(make(t,r)));   // any other forced mate in 2 counts too
+ return{ok,same,mate,t,rep}}
+
+/* ---------- puzzle list ---------- */
+const PZ=RAW.map(p=>({lv:p[0],fen:p[1],sol:p[2].split(' ').map(u=>({f:sqi(u.slice(0,2)),to:sqi(u.slice(2,4))}))}));
+
+/* ---------- state ---------- */
+const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+let st,sel,tg,last,legalNow,P,idx,k,div,myC,busy=true,running=false;
+let lives,score,solved,used,tEnd,timer=null,run=0;
+const sqs=new Array(64);
+const KEY='aminchess_pr_best';
+const getBest=()=>{try{return JSON.parse(localStorage.getItem(KEY))||{score:0,solved:0}}catch(e){return{score:0,solved:0}}};
+const setBest=b=>{try{localStorage.setItem(KEY,JSON.stringify(b))}catch(e){}};
+const show=id=>{['start','play','end'].forEach(s=>$(s).hidden=s!==id)};
+function bestText(){const b=getBest();return b.score?`Best: ${b.score} points, ${b.solved} solved`:'No best score yet, set one!'}
+
+/* ---------- board ---------- */
+function buildBoard(flip){
+ const el=$('board');el.innerHTML='';
+ for(let d=0;d<64;d++){
+  const i=flip?63-d:d,s=document.createElement('div');
+  s.className='sq '+(((i>>3)+(i&7))%2?'d':'l');
+  if((d&7)===0)s.insertAdjacentHTML('beforeend',`<i class="rk">${8-(i>>3)}</i>`);
+  if((d>>3)===7)s.insertAdjacentHTML('beforeend',`<i class="fl">${'abcdefgh'[i&7]}</i>`);
+  s.onclick=()=>click(i);
+  el.appendChild(s);sqs[i]=s}}
+function render(){
+ for(let i=0;i<64;i++){const s=sqs[i],p=st.b[i];
+  s.className='sq '+(((i>>3)+(i&7))%2?'d':'l')+(sel===i?' sel':'')+(last.includes(i)?' last':'')+(tg.has(i)?' hint'+(p?' cap':''):'');
+  let pc=s.querySelector(':scope > .p');
+  if(p){if(!pc){pc=document.createElement('div');s.appendChild(pc)}pc.className='p '+(isW(p)?'w':'b');pc.textContent=G[p.toLowerCase()]+'\uFE0E'}
+  else if(pc)pc.remove()}}
+function slide(f,to){
+ if(RM)return;
+ const pc=sqs[to].querySelector(':scope > .p');if(!pc||!pc.animate)return;
+ const a=sqs[f].getBoundingClientRect(),b=sqs[to].getBoundingClientRect();
+ pc.animate([{transform:`translate(${a.left-b.left}px,${a.top-b.top}px)`},{transform:'none'}],{duration:260,easing:'ease-out'})}
+
+/* ---------- hud ---------- */
+function hearts(hit){
+ $('hearts').innerHTML=Array.from({length:LIVES},(_,i)=>`<span class="${i>=lives?'lost':''}${hit&&i===lives?' hit':''}">♥</span>`).join('')}
+function hud(){$('score').textContent=score;$('solvedS').textContent=solved+' solved'}
+function toast(t,c){const f=$('fb');f.textContent=t;f.className='fb '+(c||'')}
+function prompt(){$('prompt').textContent=`${myC==='w'?'White':'Black'} to move: mate in ${k}`}
+function tick(){
+ const left=Math.max(0,tEnd-Date.now()),s=Math.ceil(left/1000);
+ $('time').textContent=Math.floor(s/60)+':'+String(s%60).padStart(2,'0');
+ $('time').classList.toggle('low',s<=10);
+ $('fill').style.width=(left/(DURATION*1000)*100)+'%';
+ if(left<=0)endRun('time')}
+
+/* ---------- a run ---------- */
+function startRun(){
+ lives=LIVES;score=0;solved=0;used=new Set();run++;running=true;
+ tEnd=Date.now()+DURATION*1000;
+ show('play');hearts();hud();toast('');nextPuzzle();
+ clearInterval(timer);tick();timer=setInterval(tick,100)}
+function nextPuzzle(){
+ const lv=Math.min(5,1+Math.floor(solved/PER_LEVEL));
+ let pool=PZ.filter((p,i)=>p.lv===lv&&!used.has(i));
+ for(let d=1;d<5&&!pool.length;d++)pool=PZ.filter((p,i)=>!used.has(i)&&(p.lv===lv-d||p.lv===lv+d));
+ if(!pool.length){used.clear();pool=PZ.filter(p=>p.lv===lv);if(!pool.length)pool=PZ}
+ P=pool[Math.random()*pool.length|0];used.add(PZ.indexOf(P));
+ st=fromFen(P.fen);myC=st.t;legalNow=legal(st);idx=0;k=Math.ceil(P.sol.length/2);div=false;
+ sel=null;tg=new Set();last=[];busy=false;
+ buildBoard(myC==='b');render();prompt();
+ $('lvl').textContent='Level '+P.lv;toast('')}
+function click(i){
+ if(busy||!running)return;
+ const mv=sel!==null&&legalNow.find(m=>m.f===sel&&m.to===i);
+ if(mv){tryMove(mv);return}
+ const p=st.b[i];
+ if(p&&(isW(p)?'w':'b')===myC){sel=i;tg=new Set(legalNow.filter(m=>m.f===i).map(m=>m.to))}else{sel=null;tg=new Set()}
+ render()}
+function tryMove(m){
+ const j=judge(st,m,k,P.sol[idx],div);
+ sel=null;tg=new Set();
+ if(!j.ok){wrong(m);return}
+ busy=true;const rid=run;
+ st=j.t;last=[m.f,m.to];render();slide(m.f,m.to);
+ if(j.mate){win();return}
+ setTimeout(()=>{
+  if(rid!==run)return;
+  let r;
+  if(j.same){const e=P.sol[idx+1];r=j.rep.find(x=>x.f===e.f&&x.to===e.to)}
+  if(!r)r=j.rep[Math.random()*j.rep.length|0];
+  st=make(st,r);last=[r.f,r.to];render();slide(r.f,r.to);
+  div=div||!j.same;idx+=2;k--;legalNow=legal(st);busy=false;prompt()},450)}
+function hintMove(){
+ if(!div)return P.sol[idx];
+ if(k===1)return legalNow.find(m=>{const t=make(st,m);return inCheck(t)&&!legal(t).length});
+ return null}
+function win(){
+ const rid=run,pts=POINTS(P.lv);
+ score+=pts;solved++;hud();toast('+'+pts,'good');
+ for(const i of last)sqs[i].classList.add('good');
+ setTimeout(()=>{if(rid===run)nextPuzzle()},650)}
+function wrong(m){
+ busy=true;lives--;hearts(true);
+ sqs[m.to].classList.add('bad');
+ const h=hintMove();if(h){sqs[h.f].classList.add('rev');sqs[h.to].classList.add('rev')}
+ toast('Not quite','bad');
+ const rid=run;
+ setTimeout(()=>{if(rid!==run)return;if(lives<=0)endRun('lives');else nextPuzzle()},1400)}
+function endRun(why){
+ if(!running)return;
+ running=false;busy=true;run++;clearInterval(timer);
+ const b=getBest(),nb=score>b.score;
+ if(nb)setBest({score,solved});
+ $('why').textContent=why==='time'?"Time's up":'Out of lives';
+ $('fscore').textContent=score;$('fsolved').textContent=solved;
+ $('nb').hidden=!nb||score===0;
+ $('bestE').textContent=bestText();$('bestS').textContent=bestText();
+ show('end');
+ if(nb&&score>0)confetti()}
+
+function confetti(){
+ if(RM)return;
+ const c=$('confetti'),x=c.getContext('2d');c.width=innerWidth;c.height=innerHeight;
+ const cols=['#3fb8f5','#1d96d4','#ffc800','#ff4b4b','#58cc02','#ce82ff','#ff9600'];
+ const Pt=Array.from({length:160},()=>({x:Math.random()*c.width,y:-20-Math.random()*c.height*.5,vx:(Math.random()-.5)*4,vy:2+Math.random()*4,
+  w:6+Math.random()*8,h:4+Math.random()*6,r:Math.random()*6,vr:(Math.random()-.5)*.3,c:cols[Math.random()*cols.length|0]}));
+ const t0=performance.now();
+ (function f(t){
+  const el=t-t0;x.clearRect(0,0,c.width,c.height);
+  Pt.forEach(p=>{p.x+=p.vx+Math.sin(p.y/30)*.8;p.y+=p.vy;p.vy+=.03;p.r+=p.vr;
+   x.save();x.globalAlpha=Math.max(0,Math.min(1,(4500-el)/1200));x.translate(p.x,p.y);x.rotate(p.r);x.fillStyle=p.c;x.fillRect(-p.w/2,-p.h/2,p.w,p.h);x.restore()});
+  if(el<4500)requestAnimationFrame(f);else x.clearRect(0,0,c.width,c.height)})(t0)}
+
+$('go').onclick=startRun;
+$('again').onclick=startRun;
+$('bestS').textContent=bestText();
+show('start');
+</script>
+</body>
+</html>
