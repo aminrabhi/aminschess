@@ -439,13 +439,38 @@ function win(){
  score+=pts;solved++;hud();inv();toast('+'+pts+(streak>1?'  🔥 '+streak+' streak':''),'good');
  for(const i of last)sqs[i].classList.add('good');
  setTimeout(()=>{if(rid!==run)return;solved%PER_LEVEL?nextPuzzle():draft()},650)}
+
 function wrong(m){
- busy=true;streak=0;const sh=shield>0;if(sh)shield--;else{lives--;hearts(true)}inv();
+ busy=true;streak=0;const sh=shield>0;
+ if(sh)shield--;else{lives--;hearts(true)}
+ inv();
  sqs[m.to].classList.add('bad');
- const h=hintMove();if(h){sqs[h.f].classList.add('rev');sqs[h.to].classList.add('rev')}
  toast(sh?'🛡️ Aegis took the hit':'Not quite',sh?'good':'bad');
  const rid=run;
- setTimeout(()=>{if(rid!==run)return;if(lives<=0)endRun('lives');else nextPuzzle()},1400)}
+ pauseLeft=Math.max(0,tEnd-Date.now());clearInterval(timer);
+ setTimeout(()=>{
+  if(rid!==run)return;
+  replay(rid,()=>{
+   if(rid!==run)return;
+   if(lives<=0){endRun('lives');return}
+   tEnd=Date.now()+pauseLeft;timer=setInterval(tick,100);
+   nextPuzzle()})},900)}
+
+function replay(rid,done){
+ let moves=[];
+ if(!div)moves=P.sol.slice(idx);
+ else{const h=hintMove();if(h)moves=[h]}
+ let s=st,i=0;
+ toast("Here's the solution",'');
+ (function step(){
+  if(rid!==run)return;
+  if(i>=moves.length){setTimeout(done,900);return}
+  const m=legal(s).find(x=>x.f===moves[i].f&&x.to===moves[i].to);
+  if(!m){done();return}
+  s=make(s,m);st=s;last=[m.f,m.to];sel=null;tg=new Set();
+  render();slide(m.f,m.to);
+  i++;setTimeout(step,800)})()}
+
 function endRun(why){
  if(!running)return;
  running=false;busy=true;run++;clearInterval(timer);
