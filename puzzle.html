@@ -67,6 +67,10 @@ ul.ck li::before{content:'✓';position:absolute;left:0;top:7px;width:24px;heigh
 .lvl{font-size:13px;font-weight:800;color:#7a8b97}
 .fb{min-height:30px;font-weight:900;font-size:20px}
 .fb.good{color:var(--main-d)}.fb.bad{color:var(--red)}
+.pick{display:flex;gap:14px;align-items:center;text-align:left;width:100%;text-transform:none;letter-spacing:0;font-size:16px;padding:14px 16px}
+.pick .pi{font-size:34px}.pick b{display:block;font-size:17px}.pick small{font-weight:700;color:#777;font-size:13.5px}
+.tools{display:flex;gap:8px}.tools .btn{padding:10px 14px;font-size:13px}.tools .btn:disabled{opacity:.4;cursor:default}
+.inv{font-weight:900;font-size:15px;min-height:20px;color:var(--main-d)}
 </style>
 </head>
 <body>
@@ -103,7 +107,18 @@ ul.ck li::before{content:'✓';position:absolute;left:0;top:7px;width:24px;heigh
  <div class="board" id="board"></div>
  <div class="prompt" id="prompt"></div>
  <div class="lvl" id="lvl"></div>
+ <div class="inv" id="inv"></div>
+<div class="tools"><button class="btn" id="hintB">💡 Hint</button><button class="btn" id="skipB">🌀 Skip</button></div>
  <div class="fb" id="fb"></div>
+</main>
+
+<main class="screen" id="draft" hidden>
+ <div class="card">
+  <h1>pick a relic</h1>
+  <p class="sub" id="floor"></p>
+  <div id="picks" style="display:flex;flex-direction:column;gap:10px;width:100%"></div>
+  <p class="sub" style="font-size:13px">The clock is paused.</p>
+ </div>
 </main>
 
 <!-- results -->
@@ -334,11 +349,12 @@ const PZ=RAW.map(p=>({lv:p[0],fen:p[1],sol:p[2].split(' ').map(u=>({f:sqi(u.slic
 const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
 let st,sel,tg,last,legalNow,P,idx,k,div,myC,busy=true,running=false;
 let lives,score,solved,used,tEnd,timer=null,run=0;
+let maxL=LIVES,shield=0,hints=0,skips=0,mult=1,streak=0,sb=2,pauseLeft=0;
 const sqs=new Array(64);
 const KEY='aminchess_pr_best';
 const getBest=()=>{try{return JSON.parse(localStorage.getItem(KEY))||{score:0,solved:0}}catch(e){return{score:0,solved:0}}};
 const setBest=b=>{try{localStorage.setItem(KEY,JSON.stringify(b))}catch(e){}};
-const show=id=>{['start','play','end'].forEach(s=>$(s).hidden=s!==id)};
+const show=id=>{['start','play','end','draft'].forEach(s=>$(s).hidden=s!==id)};
 function bestText(){const b=getBest();return b.score?`Best: ${b.score} points, ${b.solved} solved`:'No best score yet, set one!'}
 
 /* ---------- board ---------- */
@@ -365,7 +381,7 @@ function slide(f,to){
 
 /* ---------- hud ---------- */
 function hearts(hit){
- $('hearts').innerHTML=Array.from({length:LIVES},(_,i)=>`<span class="${i>=lives?'lost':''}${hit&&i===lives?' hit':''}">♥</span>`).join('')}
+ $('hearts').innerHTML=Array.from({length:maxL},(_,i)=>`<span class="${i>=lives?'lost':''}${hit&&i===lives?' hit':''}">♥</span>`).join('')}
 function hud(){$('score').textContent=score;$('solvedS').textContent=solved+' solved'}
 function toast(t,c){const f=$('fb');f.textContent=t;f.className='fb '+(c||'')}
 function prompt(){$('prompt').textContent=`${myC==='w'?'White':'Black'} to move: mate in ${k}`}
@@ -373,14 +389,14 @@ function tick(){
  const left=Math.max(0,tEnd-Date.now()),s=Math.ceil(left/1000);
  $('time').textContent=Math.floor(s/60)+':'+String(s%60).padStart(2,'0');
  $('time').classList.toggle('low',s<=10);
- $('fill').style.width=(left/(DURATION*1000)*100)+'%';
+ $('fill').style.width=Math.min(100,left/(DURATION*1000)*100)+'%';
  if(left<=0)endRun('time')}
 
 /* ---------- a run ---------- */
 function startRun(){
- lives=LIVES;score=0;solved=0;used=new Set();run++;running=true;
+ 	lives=maxL=LIVES;shield=hints=skips=streak=0;mult=1;sb=2;score=0;solved=0;used=new Set();run++;running=true;
  tEnd=Date.now()+DURATION*1000;
- show('play');hearts();hud();toast('');nextPuzzle();
+ 	show('play');hearts();hud();inv();toast('');nextPuzzle();
  clearInterval(timer);tick();timer=setInterval(tick,100)}
 function nextPuzzle(){
  const lv=Math.min(5,1+Math.floor(solved/PER_LEVEL));
@@ -391,7 +407,7 @@ function nextPuzzle(){
  st=fromFen(P.fen);myC=st.t;legalNow=legal(st);idx=0;k=Math.ceil(P.sol.length/2);div=false;
  sel=null;tg=new Set();last=[];busy=false;
  buildBoard(myC==='b');render();prompt();
- $('lvl').textContent='Level '+P.lv;toast('')}
+ $('lvl').textContent='Level '+P.lv+' · Floor '+(Math.floor(solved/PER_LEVEL)+1);toast('')}
 function click(i){
  if(busy||!running)return;
  const mv=sel!==null&&legalNow.find(m=>m.f===sel&&m.to===i);
@@ -418,15 +434,16 @@ function hintMove(){
  if(k===1)return legalNow.find(m=>{const t=make(st,m);return inCheck(t)&&!legal(t).length});
  return null}
 function win(){
- const rid=run,pts=POINTS(P.lv);
- score+=pts;solved++;hud();toast('+'+pts,'good');
+ const rid=run;streak++;
+ const pts=Math.round(POINTS(P.lv)*mult)+Math.min(streak-1,6)*sb;
+ score+=pts;solved++;hud();inv();toast('+'+pts+(streak>1?'  🔥 '+streak+' streak':''),'good');
  for(const i of last)sqs[i].classList.add('good');
- setTimeout(()=>{if(rid===run)nextPuzzle()},650)}
+ setTimeout(()=>{if(rid!==run)return;solved%PER_LEVEL?nextPuzzle():draft()},650)}
 function wrong(m){
- busy=true;lives--;hearts(true);
+ busy=true;streak=0;const sh=shield>0;if(sh)shield--;else{lives--;hearts(true)}inv();
  sqs[m.to].classList.add('bad');
  const h=hintMove();if(h){sqs[h.f].classList.add('rev');sqs[h.to].classList.add('rev')}
- toast('Not quite','bad');
+ toast(sh?'🛡️ Aegis took the hit':'Not quite',sh?'good':'bad');
  const rid=run;
  setTimeout(()=>{if(rid!==run)return;if(lives<=0)endRun('lives');else nextPuzzle()},1400)}
 function endRun(why){
@@ -453,6 +470,39 @@ function confetti(){
   Pt.forEach(p=>{p.x+=p.vx+Math.sin(p.y/30)*.8;p.y+=p.vy;p.vy+=.03;p.r+=p.vr;
    x.save();x.globalAlpha=Math.max(0,Math.min(1,(4500-el)/1200));x.translate(p.x,p.y);x.rotate(p.r);x.fillStyle=p.c;x.fillRect(-p.w/2,-p.h/2,p.w,p.h);x.restore()});
   if(el<4500)requestAnimationFrame(f);else x.clearRect(0,0,c.width,c.height)})(t0)}
+
+/* ---------- roguelike relics ---------- */
+const PERKS=[
+ {i:'❤️',n:'Extra Heart',d:'+1 max life and heal 1',f:()=>{maxL++;lives++}},
+ {i:'⏳',n:'Time Warp',d:'+25 seconds on the clock',f:()=>{pauseLeft+=25000}},
+ {i:'🛡️',n:'Aegis',d:'Blocks your next mistake',ok:()=>shield<3,f:()=>shield++},
+ {i:'💡',n:'Hint Stone',d:'+2 hints (shows the first move)',f:()=>{hints+=2}},
+ {i:'🌀',n:'Skip Scroll',d:'+1 free skip',f:()=>{skips++}},
+ {i:'💰',n:'Gold Rush',d:'Puzzle points x1.25',f:()=>{mult+=.25}},
+ {i:'🔥',n:'Streak Master',d:'Bigger streak bonus',f:()=>{sb+=2}},
+ {i:'💀',n:'Glass Cannon',d:'Drop to 1 life, but points x2',ok:()=>lives>1,f:()=>{lives=1;mult+=1}}
+];
+function inv(){
+ $('inv').textContent=[shield?'🛡️'+shield:'',mult>1?'💰x'+mult:'',streak>1?'🔥'+streak:''].filter(Boolean).join('  ');
+ $('hintB').textContent='💡 Hint ('+hints+')';$('hintB').disabled=!hints;
+ $('skipB').textContent='🌀 Skip ('+skips+')';$('skipB').disabled=!skips}
+function draft(){
+ pauseLeft=Math.max(0,tEnd-Date.now());clearInterval(timer);busy=true;
+ const opts=PERKS.filter(p=>!p.ok||p.ok()).sort(()=>Math.random()-.5).slice(0,3);
+ $('floor').textContent='Floor '+(solved/PER_LEVEL)+' cleared';
+ $('picks').innerHTML='';
+ opts.forEach(p=>{
+  const b=document.createElement('button');b.className='btn pick';
+  b.innerHTML=`<span class="pi">${p.i}</span><span><b>${p.n}</b><small>${p.d}</small></span>`;
+  b.onclick=()=>{
+   p.f();tEnd=Date.now()+pauseLeft;
+   show('play');hearts();hud();inv();
+   timer=setInterval(tick,100);tick();
+   if(running)nextPuzzle()};
+  $('picks').appendChild(b)});
+ show('draft')}
+$('hintB').onclick=()=>{if(busy||!running||!hints)return;const h=hintMove();if(!h){toast('No hint for this one');return}hints--;inv();sqs[h.f].classList.add('rev')};
+$('skipB').onclick=()=>{if(busy||!running||!skips)return;skips--;inv();nextPuzzle()};
 
 $('go').onclick=startRun;
 $('again').onclick=startRun;
